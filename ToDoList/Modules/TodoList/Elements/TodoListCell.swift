@@ -41,6 +41,19 @@ final class TodoListCell: UITableViewCell {
         return label
     }()
     
+    lazy var textDataStackView: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [
+            titleLabel,
+            descriptionLabel,
+            dateOfCreationLabel
+        ])
+        stack.axis = .vertical
+        stack.spacing = 6
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    
     // MARK: - Initialization
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -65,7 +78,8 @@ final class TodoListCell: UITableViewCell {
     
     // MARK: - UI Setup
     private func setupUI() {
-        [checkBox, titleLabel, descriptionLabel, dateOfCreationLabel].forEach {
+
+        [checkBox, textDataStackView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
         }
@@ -79,17 +93,10 @@ final class TodoListCell: UITableViewCell {
             checkBox.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
             checkBox.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             
-            titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
-            titleLabel.leadingAnchor.constraint(equalTo: checkBox.trailingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
-            descriptionLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            descriptionLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            
-            dateOfCreationLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 6),
-            dateOfCreationLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
-            dateOfCreationLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20)
+            textDataStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            textDataStackView.leadingAnchor.constraint(equalTo: checkBox.trailingAnchor, constant: 8),
+            textDataStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            textDataStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -12)
         ])
     }
     

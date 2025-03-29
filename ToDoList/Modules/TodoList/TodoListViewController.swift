@@ -35,7 +35,7 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBlack
-
+        
         configureUI()
         configureConstraints()
     }
@@ -89,6 +89,63 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     // MARK: - UITableViewDelegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) { _ in
+            let editAction = UIAction(
+                title: "Редактировать",
+                image: .iconContextMenuEdit) { _ in
+                    // todo edit
+                }
+            
+            let shareAction = UIAction(
+                title: "Поделиться",
+                image: .iconContextMenuShare) { _ in
+                    // todo share
+                }
+            
+            let deleteAction = UIAction(
+                title: "Удалить",
+                image: .iconContextMenuDelete,
+                attributes: .destructive) { _ in
+                    // todo delete
+                }
+            
+            return UIMenu(title: "", children: [editAction, shareAction, deleteAction])
+        }
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        return makeTargetedPreview(for: configuration)
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        return makeTargetedPreview(for: configuration)
+    }
+    
+    private func makeTargetedPreview(for configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard
+            let indexPath = configuration.identifier as? IndexPath,
+            let cell = todoListTableView.cellForRow(at: indexPath) as? TodoListCell else { return nil }
+        
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .appGray
+        
+        let enlargedRect = cell.textDataStackView.bounds.insetBy(dx: -16, dy: -12)
+        parameters.visiblePath = UIBezierPath(roundedRect: enlargedRect, cornerRadius: 12)
+        
+        return UITargetedPreview(view: cell.textDataStackView, parameters: parameters)
     }
     
     // MARK: - UISearchController

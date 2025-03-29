@@ -20,18 +20,20 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
         return tableView
     }()
     
+    private let customTabBar = CustomTabBar()
+    
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBlack
-        
+
         configureUI()
         configureConstraints()
     }
     
     // MARK: - UI Setup
     private func configureUI() {
-        [todoListTableView].forEach {
+        [todoListTableView, customTabBar].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
         }
@@ -43,7 +45,13 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
             todoListTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             todoListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             todoListTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            todoListTableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            todoListTableView.bottomAnchor.constraint(equalTo: customTabBar.topAnchor),
+            
+            customTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            customTabBar.heightAnchor.constraint(equalToConstant: 85),
+            
         ])
     }
     

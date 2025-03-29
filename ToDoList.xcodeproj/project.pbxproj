@@ -52,13 +52,29 @@
 		4B13992F2D9837AA001973F5 /* ToDoList */ = {
 			isa = PBXGroup;
 			children = (
-				4B13991A2D983617001973F5 /* AppDelegate.swift */,
-				4B1399232D983619001973F5 /* Assets.xcassets */,
+				4B9DC7FF2D983F55000F42E2 /* Assets */,
+				4B9DC7FE2D983F3E000F42E2 /* App */,
 				4B1399282D983619001973F5 /* Info.plist */,
-				4B1399252D983619001973F5 /* LaunchScreen.storyboard */,
-				4B13991C2D983617001973F5 /* SceneDelegate.swift */,
 			);
 			path = ToDoList;
+			sourceTree = "<group>";
+		};
+		4B9DC7FE2D983F3E000F42E2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4B13991A2D983617001973F5 /* AppDelegate.swift */,
+				4B13991C2D983617001973F5 /* SceneDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		4B9DC7FF2D983F55000F42E2 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				4B1399232D983619001973F5 /* Assets.xcassets */,
+				4B1399252D983619001973F5 /* LaunchScreen.storyboard */,
+			);
+			path = Assets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

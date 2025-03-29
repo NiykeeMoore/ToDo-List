@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TodoListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+final class TodoListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
     // MARK: - UI Elements
     private lazy var todoListTableView: UITableView = {
         let tableView = UITableView()
@@ -22,6 +22,15 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     
     private let customTabBar = CustomTabBar()
     
+    private lazy var searchController: UISearchController = {
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.autocapitalizationType = .none
+        searchController.searchBar.tintColor = .appWhite
+        return searchController
+    }()
+    
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +42,13 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     
     // MARK: - UI Setup
     private func configureUI() {
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.title = "Задачи"
+        
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        searchController.searchBar.searchTextField.textColor = .appWhite
+        
         [todoListTableView, customTabBar].forEach {
             view.addSubview($0)
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -73,5 +89,10 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     // MARK: - UITableViewDelegate
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: false)
+    }
+    
+    // MARK: - UISearchController
+    func updateSearchResults(for searchController: UISearchController) {
+        
     }
 }

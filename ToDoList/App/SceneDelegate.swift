@@ -14,7 +14,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         
-        window.rootViewController = TodoListViewController()
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .appBlack
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.appWhite]
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.appWhite]
+        
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        
+        let rootVC = TodoListViewController()
+        window.rootViewController = UINavigationController(rootViewController: rootVC)
         
         self.window = window
         window.makeKeyAndVisible()

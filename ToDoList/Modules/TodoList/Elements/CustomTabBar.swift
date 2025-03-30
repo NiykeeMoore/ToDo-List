@@ -14,10 +14,15 @@ protocol CustomTabBarDelegate: AnyObject {
 final class CustomTabBar: UIView {
     weak var delegate: CustomTabBarDelegate?
     
+    private var todosCount: Int = 0 {
+        didSet {
+            todosCounterLabel.text = "\(todosCount) Задач"
+        }
+    }
+    
     // MARK: - UI Elements
     private lazy var todosCounterLabel: UILabel = {
         let label = UILabel()
-        label.text = "7 Задач"
         label.textColor = .appWhite
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 11)
@@ -55,6 +60,10 @@ final class CustomTabBar: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func updateTodoCounterLabel(_ count: Int) {
+        todosCount = count
     }
     
     //MARK: - Actions

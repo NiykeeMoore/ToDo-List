@@ -198,6 +198,7 @@ final class TodoListViewController: UIViewController,
     func todosLoaded(todos: [Todo]) {
         self.todos = todos
         todoListTableView.reloadData()
+        customTabBar.updateTodoCounterLabel(todos.count)
     }
     
     func displayError(error: any Error) {

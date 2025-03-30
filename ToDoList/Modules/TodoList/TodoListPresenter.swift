@@ -54,7 +54,6 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         }
     }
     
-    
     // MARK: - TodoInteractorOutput
     func didFetchTodos(todos: [Todo]) {
         self.todos = todos

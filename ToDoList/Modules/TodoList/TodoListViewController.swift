@@ -7,7 +7,22 @@
 
 import UIKit
 
-final class TodoListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
+protocol TodoListViewInput: AnyObject {
+    func todosLoaded(todos: [Todo])
+    func displayError(error: Error)
+}
+
+final class TodoListViewController: UIViewController,
+                                    UITableViewDelegate, UITableViewDataSource,
+                                    UISearchResultsUpdating,
+                                    TodoListViewInput,
+                                    CheckBoxDelegate {
+    // MARK: - Dependencies
+    private let presenter: TodoPresenterInput
+    
+    // MARK: - Properties
+    private var todos: [Todo] = []
+    
     // MARK: - UI Elements
     private lazy var todoListTableView: UITableView = {
         let tableView = UITableView()
@@ -31,10 +46,22 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
         return searchController
     }()
     
+    //MARK: - Initialization
+    init(presenter: TodoPresenterInput) {
+        self.presenter = presenter
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .appBlack
+        
+        presenter.viewDidLoad()
         
         configureUI()
         configureConstraints()
@@ -73,16 +100,23 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 50
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 106
+        return todos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier) as? TodoListCell else { return UITableViewCell() }
-        cell.configureCell(title: "test", description: "sdfka;slkf;lsakgl;ksdfkgs\n ;lskdfgks;dlfkg;skd;fgks;dkfggfdkgjdjfgjdhfjghdfg;ldkfggsjdhfgjshdgkjshdjfkghsdg", date: "ssdf.d.sdf.")
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier) as? TodoListCell
+        else { return UITableViewCell() }
+        
+        cell.checkBox.delegate = self
+        
+        let todo = todos[indexPath.row]
+        cell.configureCell(
+            title: todo.title,
+            description: todo.description,
+            date: todo.dateOfCreation,
+            state: todo.isCompleted
+        )
+        
         return cell
     }
     
@@ -151,5 +185,35 @@ final class TodoListViewController: UIViewController, UITableViewDelegate, UITab
     // MARK: - UISearchController
     func updateSearchResults(for searchController: UISearchController) {
         
+    }
+    
+    // MARK: - TodoListViewInput
+    func todosLoaded(todos: [Todo]) {
+        self.todos = todos
+        todoListTableView.reloadData()
+    }
+    
+    func displayError(error: any Error) {
+        let alert = UIAlertController(title: "Ошибка",
+                                      message: error.localizedDescription,
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    // MARK: - CheckBoxDelegate
+    func checkBoxDidTapped(checkBox: CheckBox) {
+        guard
+            let cell = checkBox.firstSuperview(of: TodoListCell.self),
+            let indexPath = todoListTableView.indexPath(for: cell) else { return }
+        
+        presenter.checkboxDidTapped(at: indexPath.row)
+    }
+}
+
+/// Рекурсивно ходим по супервью пока не найдем объект который нам нужен
+extension UIView {
+    func firstSuperview<T: UIView>(of type: T.Type) -> T? {
+        return superview as? T ?? superview?.firstSuperview(of: T.self)
     }
 }

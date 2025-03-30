@@ -20,7 +20,7 @@ extension TodoItemDTO {
             id: id,
             title: todo,
             description: description,
-            dateofCreation: dateOfCreation,
+            dateOfCreation: dateOfCreation,
             isCompleted: completed
         )
     }

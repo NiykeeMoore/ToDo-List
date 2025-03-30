@@ -7,15 +7,15 @@
 
 import UIKit
 
-final class TodoListCell: UITableViewCell {
+final class TodoListCell: UITableViewCell, CheckBoxDelegate {
     // MARK: - Properties
     static let reuseIdentifier = String(describing: TodoListCell.self)
-    
+    private var isCompleted: Bool = false
     // MARK: - UI Elements
-    private lazy var checkBox: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle"))
-        imageView.tintColor = .appYellow
-        return imageView
+    lazy var checkBox: CheckBox = {
+        let checkbox = CheckBox()
+        checkbox.delegate = self
+        return checkbox
     }()
     
     private lazy var titleLabel: UILabel = {
@@ -73,7 +73,8 @@ final class TodoListCell: UITableViewCell {
         titleLabel.text = nil
         descriptionLabel.text = nil
         dateOfCreationLabel.text = nil
-        checkBox.image = nil
+        isCompleted = false
+        checkBox.isSelected = isCompleted
     }
     
     // MARK: - UI Setup
@@ -101,10 +102,20 @@ final class TodoListCell: UITableViewCell {
     }
     
     // MARK: - Helper methods
-    func configureCell(title: String, description: String, date: String) {
+    func configureCell(
+        title: String,
+        description: String,
+        date: String,
+        state: Bool
+    ) {
         titleLabel.text = title
         descriptionLabel.text = description
         dateOfCreationLabel.text = date
-        checkBox.image = UIImage(systemName: "checkmark.circle")
+        checkBox.setState(state)
+    }
+    
+    func checkBoxDidTapped(checkBox: CheckBox) {
+        isCompleted.toggle()
+        checkBox.setState(isCompleted)
     }
 }

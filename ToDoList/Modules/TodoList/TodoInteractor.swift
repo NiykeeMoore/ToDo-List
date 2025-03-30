@@ -9,6 +9,7 @@ import Foundation
 
 protocol TodoInteractorInput {
     func fetchTodos()
+    func toggleTodoComplition(at index: Int)
 }
 
 protocol TodoInteractorOutput: AnyObject {
@@ -43,6 +44,16 @@ final class TodoInteractor: TodoInteractorInput {
                     self.presenter?.didFailToFetchTodos(error: error)
                 }
             }
+        }
+    }
+    
+    func toggleTodoComplition(at index: Int) {
+        let updatedTask = todos[index].withUpdatedComplition(isCompleted: !todos[index].isCompleted)
+        todos[index] = updatedTask
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.presenter?.didFetchTodos(todos: self.todos)
         }
     }
 }

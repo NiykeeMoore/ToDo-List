@@ -15,7 +15,8 @@ protocol TodoListViewInput: AnyObject {
 final class TodoListViewController: UIViewController,
                                     UITableViewDelegate, UITableViewDataSource,
                                     UISearchResultsUpdating,
-                                    TodoListViewInput {
+                                    TodoListViewInput,
+                                    CheckBoxDelegate {
     // MARK: - Dependencies
     private let presenter: TodoPresenterInput
     
@@ -106,11 +107,14 @@ final class TodoListViewController: UIViewController,
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier) as? TodoListCell
         else { return UITableViewCell() }
         
+        cell.checkBox.delegate = self
+        
         let todo = todos[indexPath.row]
         cell.configureCell(
             title: todo.title,
             description: todo.description,
-            date: todo.dateofCreation
+            date: todo.dateOfCreation,
+            state: todo.isCompleted
         )
         
         return cell
@@ -195,5 +199,21 @@ final class TodoListViewController: UIViewController,
                                       preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    // MARK: - CheckBoxDelegate
+    func checkBoxDidTapped(checkBox: CheckBox) {
+        guard
+            let cell = checkBox.firstSuperview(of: TodoListCell.self),
+            let indexPath = todoListTableView.indexPath(for: cell) else { return }
+        
+        presenter.checkboxDidTapped(at: indexPath.row)
+    }
+}
+
+/// Рекурсивно ходим по супервью пока не найдем объект который нам нужен
+extension UIView {
+    func firstSuperview<T: UIView>(of type: T.Type) -> T? {
+        return superview as? T ?? superview?.firstSuperview(of: T.self)
     }
 }

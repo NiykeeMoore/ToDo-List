@@ -9,6 +9,7 @@ import Foundation
 
 protocol TodoPresenterInput {
     func viewDidLoad()
+    func checkboxDidTapped(at index: Int)
 }
 
 final class TodoPresenter: TodoPresenterInput, TodoInteractorOutput {
@@ -27,6 +28,10 @@ final class TodoPresenter: TodoPresenterInput, TodoInteractorOutput {
     // MARK: - TodoInteractorInput
     func viewDidLoad() {
         interactor.fetchTodos()
+    }
+    
+    func checkboxDidTapped(at index: Int) {
+        interactor.toggleTodoComplition(at: index)
     }
     
     // MARK: - TodoInteractorOutput

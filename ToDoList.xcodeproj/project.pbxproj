@@ -22,6 +22,7 @@
 		4B9DC81C2D987370000F42E2 /* TodoRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC81B2D987370000F42E2 /* TodoRouter.swift */; };
 		4B9DC81E2D9873E2000F42E2 /* TodoPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC81D2D9873E2000F42E2 /* TodoPresenter.swift */; };
 		4B9DC8202D987415000F42E2 /* TodoInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC81F2D987415000F42E2 /* TodoInteractor.swift */; };
+		4B9DC8222D993E65000F42E2 /* CheckBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8212D993E65000F42E2 /* CheckBox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		4B9DC81B2D987370000F42E2 /* TodoRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoRouter.swift; sourceTree = "<group>"; };
 		4B9DC81D2D9873E2000F42E2 /* TodoPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoPresenter.swift; sourceTree = "<group>"; };
 		4B9DC81F2D987415000F42E2 /* TodoInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoInteractor.swift; sourceTree = "<group>"; };
+		4B9DC8212D993E65000F42E2 /* CheckBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckBox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +128,7 @@
 			children = (
 				4B9DC8052D984174000F42E2 /* TodoListCell.swift */,
 				4B9DC8082D9850C3000F42E2 /* CustomTabBar.swift */,
+				4B9DC8212D993E65000F42E2 /* CheckBox.swift */,
 			);
 			path = Elements;
 			sourceTree = "<group>";
@@ -249,6 +252,7 @@
 				4B9DC8102D986C0A000F42E2 /* NetworkClient.swift in Sources */,
 				4B9DC8092D9850C3000F42E2 /* CustomTabBar.swift in Sources */,
 				4B9DC81E2D9873E2000F42E2 /* TodoPresenter.swift in Sources */,
+				4B9DC8222D993E65000F42E2 /* CheckBox.swift in Sources */,
 				4B9DC81C2D987370000F42E2 /* TodoRouter.swift in Sources */,
 				4B9DC8062D984174000F42E2 /* TodoListCell.swift in Sources */,
 				4B9DC8182D9870BC000F42E2 /* Todo.swift in Sources */,

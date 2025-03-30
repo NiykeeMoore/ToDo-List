@@ -8,12 +8,14 @@
 import UIKit
 
 protocol TodoListRouter: AnyObject {
-    func navigateToTodoDetail(from viewController: UIViewController)
+    func navigateToTodoDetail()
 }
 
 final class TodoListRouterImpl: TodoListRouter {
-    func navigateToTodoDetail(from viewController: UIViewController) {
+    weak var viewController: UIViewController?
+    
+    func navigateToTodoDetail() {
         let detailViewController = TodoDetailModuleBuilder.createModule(with: nil)
-        viewController.navigationController?.pushViewController(detailViewController, animated: true)
+        viewController?.navigationController?.pushViewController(detailViewController, animated: true)
     }
 }

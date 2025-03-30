@@ -22,4 +22,22 @@ struct Todo {
             dateOfCreation: self.dateOfCreation,
             isCompleted: isCompleted)
     }
+    
+    func withUpdatedTitle(title: String) -> Self {
+        return Todo(
+            id: self.id,
+            title: title,
+            description: self.description,
+            dateOfCreation: self.dateOfCreation,
+            isCompleted: self.isCompleted)
+    }
+    
+    func withUpdatedDescription(description: String) -> Self {
+        return Todo(
+            id: self.id,
+            title: self.title,
+            description: description,
+            dateOfCreation: self.dateOfCreation,
+            isCompleted: self.isCompleted)
+    }
 }

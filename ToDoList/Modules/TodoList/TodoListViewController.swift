@@ -215,7 +215,7 @@ final class TodoListViewController: UIViewController,
     
     // MARK: - CustomTabBarDelegate
     func didTapCreateTodoButton() {
-        presenter.didTappedCreateTodoButton(from: self)
+        presenter.didTappedCreateTodoButton()
     }
 }
 

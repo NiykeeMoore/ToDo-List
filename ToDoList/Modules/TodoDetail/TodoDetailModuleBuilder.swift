@@ -12,11 +12,13 @@ enum TodoDetailModuleBuilder {
         let interactor = TodoDetailInteractor(todo: todo)
         let presenter = TodoDetailPresenter(interactor: interactor, todo: todo)
         let viewController = TodoDetailViewController()
+        let router = TodoDetailRouter()
         viewController.presenter = presenter
         
         presenter.viewController = viewController
-        presenter.router = TodoDetailRouter()
+        presenter.router = router
         interactor.presenter = presenter
+        router.view = viewController
         
         return viewController
     }

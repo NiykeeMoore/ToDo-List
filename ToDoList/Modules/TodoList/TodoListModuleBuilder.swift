@@ -15,11 +15,12 @@ enum TodoListModuleBuilder {
         let interactor = TodoListInteractor(todosLoader: todosLoader)
         let presesenter = TodoListPresenter(interactor: interactor)
         let view = TodoListViewController(presenter: presesenter)
+        let router = TodoListRouterImpl()
         
         presesenter.viewController = view
-        presesenter.router = TodoListRouterImpl()
+        presesenter.router = router
         interactor.presenter = presesenter
-        
+        router.viewController = view
         return view
     }
 }

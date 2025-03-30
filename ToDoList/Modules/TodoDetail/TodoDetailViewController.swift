@@ -24,7 +24,6 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
         textField.font = .boldSystemFont(ofSize: 34)
         textField.textColor = .appWhite
         textField.placeholder = "Тема todo"
-        textField.backgroundColor = .red
         return textField
     }()
     
@@ -32,8 +31,6 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12)
         label.textColor = .appWhiteHalfOpacity
-        label.backgroundColor = .yellow
-        label.text = "test"
         return label
     }()
     
@@ -42,7 +39,6 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
         textView.backgroundColor = .clear
         textView.textColor = .appWhite
         textView.font = .systemFont(ofSize: 16)
-        textView.backgroundColor = .blue
         return textView
     }()
     
@@ -76,6 +72,7 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
         backButton.setTitle(" Назад", for: .normal)
         backButton.sizeToFit()
         backButton.tintColor = .appYellow
+        backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         
         let barButtonItem = UIBarButtonItem(customView: backButton)
         navigationItem.leftBarButtonItem = barButtonItem
@@ -99,6 +96,25 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
     }
     
     func todoLoaded(_ todo: Todo?) {
-        
+        self.todo = todo
+        titleTextField.text = todo?.title
+        descriptionTextView.text = todo?.description
+        dateLabel.text = todo?.dateOfCreation
+    }
+    
+    @objc private func backButtonTapped() {
+        guard let currentTask = todo,
+              let newTitle = titleTextField.text, !newTitle.isEmpty,
+              let newDescription = descriptionTextView.text else {
+            presenter?.buttonBackPressed(save: nil)
+            return
+        }
+        if currentTask.title == newTitle && currentTask.description == newDescription {
+            presenter?.buttonBackPressed(save: nil)
+        } else {
+            let updatedTask = currentTask.withUpdatedTitle(title: newTitle)
+                .withUpdatedDescription(description: newDescription)
+            presenter?.buttonBackPressed(save: updatedTask)
+        }
     }
 }

@@ -5,10 +5,11 @@
 //  Created by Niykee Moore on 30.03.2025.
 //
 
-import Foundation
+import UIKit
 
 protocol TodoDetailPresenterInput: AnyObject {
     func viewDidLoad()
+    func buttonBackPressed(save todo: Todo?)
 }
 
 final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorOutput {
@@ -27,6 +28,31 @@ final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorO
     
     // MARK: - TodoDetailPresenterInput
     func viewDidLoad() {
-        viewController?.todoLoaded(todo)
+        if let existingTodo = todo {
+            viewController?.todoLoaded(existingTodo)
+        } else {
+            let emptyTodo = Todo(
+                id: 0,
+                title: "",
+                description: "",
+                dateOfCreation: customTodayDate(),
+                isCompleted: false
+            )
+            self.todo = emptyTodo
+            viewController?.todoLoaded(emptyTodo)
+        }
+    }
+    
+    func buttonBackPressed(save savedTodo: Todo?) {
+        if let savedTodo {
+            interactor?.saveTodo(todo: savedTodo)
+        }
+        router?.navigateBack()
+    }
+    
+    private func customTodayDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        return dateFormatter.string(from: Date())
     }
 }

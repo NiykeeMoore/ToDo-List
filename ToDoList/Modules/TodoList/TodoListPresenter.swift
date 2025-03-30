@@ -10,7 +10,7 @@ import UIKit
 protocol TodoPresenterInput {
     func viewDidLoad()
     func checkboxDidTapped(at index: Int)
-    func didTappedCreateTodoButton(from view: UIViewController)
+    func didTappedCreateTodoButton()
 }
 
 final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
@@ -36,8 +36,8 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         interactor.toggleTodoComplition(at: index)
     }
     
-    func didTappedCreateTodoButton(from viewController: UIViewController) {
-        router?.navigateToTodoDetail(from: viewController)
+    func didTappedCreateTodoButton() {
+        router?.navigateToTodoDetail()
     }
     
     

@@ -8,7 +8,7 @@
 import Foundation
 
 protocol TodoDetailInteractorInput: AnyObject {
-    
+    func saveTodo(todo: Todo)
 }
 
 protocol TodoDetailInteractorOutput: AnyObject {
@@ -25,5 +25,9 @@ final class TodoDetailInteractor: TodoDetailInteractorInput {
     // MARK: - Initialization
     init(todo: Todo?) {
         self.todo = todo
+    }
+    
+    func saveTodo(todo: Todo) {
+        print("SAVED TODO: \(todo)")
     }
 }

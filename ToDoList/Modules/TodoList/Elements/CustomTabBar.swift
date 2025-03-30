@@ -7,7 +7,13 @@
 
 import UIKit
 
+protocol CustomTabBarDelegate: AnyObject {
+    func didTapCreateTodoButton()
+}
+
 final class CustomTabBar: UIView {
+    weak var delegate: CustomTabBarDelegate?
+    
     // MARK: - UI Elements
     private lazy var todosCounterLabel: UILabel = {
         let label = UILabel()
@@ -22,6 +28,7 @@ final class CustomTabBar: UIView {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
         button.tintColor = .appYellow
+        button.addTarget(self, action: #selector(createTodoButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -48,5 +55,10 @@ final class CustomTabBar: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    //MARK: - Actions
+    @objc func createTodoButtonTapped() {
+        delegate?.didTapCreateTodoButton()
     }
 }

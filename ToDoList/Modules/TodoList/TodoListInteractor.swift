@@ -17,7 +17,7 @@ protocol TodoInteractorOutput: AnyObject {
     func didFailToFetchTodos(error: Error)
 }
 
-final class TodoInteractor: TodoInteractorInput {
+final class TodoListInteractor: TodoInteractorInput {
     // MARK: - Dependencies
     weak var presenter: TodoInteractorOutput?
     private let todosLoader: TodosLoader

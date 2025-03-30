@@ -16,7 +16,8 @@ final class TodoListViewController: UIViewController,
                                     UITableViewDelegate, UITableViewDataSource,
                                     UISearchResultsUpdating,
                                     TodoListViewInput,
-                                    CheckBoxDelegate {
+                                    CheckBoxDelegate,
+                                    CustomTabBarDelegate {
     // MARK: - Dependencies
     private let presenter: TodoPresenterInput
     
@@ -65,6 +66,8 @@ final class TodoListViewController: UIViewController,
         
         configureUI()
         configureConstraints()
+        
+        customTabBar.delegate = self
     }
     
     // MARK: - UI Setup
@@ -208,6 +211,11 @@ final class TodoListViewController: UIViewController,
             let indexPath = todoListTableView.indexPath(for: cell) else { return }
         
         presenter.checkboxDidTapped(at: indexPath.row)
+    }
+    
+    // MARK: - CustomTabBarDelegate
+    func didTapCreateTodoButton() {
+        presenter.didTappedCreateTodoButton(from: self)
     }
 }
 

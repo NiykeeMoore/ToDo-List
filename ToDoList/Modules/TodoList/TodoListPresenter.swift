@@ -5,17 +5,19 @@
 //  Created by Niykee Moore on 29.03.2025.
 //
 
-import Foundation
+import UIKit
 
 protocol TodoPresenterInput {
     func viewDidLoad()
     func checkboxDidTapped(at index: Int)
+    func didTappedCreateTodoButton(from view: UIViewController)
 }
 
-final class TodoPresenter: TodoPresenterInput, TodoInteractorOutput {
+final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     // MARK: - Dependencies
     weak var viewController: TodoListViewInput?
     var interactor: TodoInteractorInput
+    var router: TodoListRouter?
     
     // MARK: - Properties
     private var todos: [Todo] = []
@@ -33,6 +35,11 @@ final class TodoPresenter: TodoPresenterInput, TodoInteractorOutput {
     func checkboxDidTapped(at index: Int) {
         interactor.toggleTodoComplition(at: index)
     }
+    
+    func didTappedCreateTodoButton(from viewController: UIViewController) {
+        router?.navigateToTodoDetail(from: viewController)
+    }
+    
     
     // MARK: - TodoInteractorOutput
     func didFetchTodos(todos: [Todo]) {

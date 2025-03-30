@@ -33,6 +33,7 @@ final class TodoListViewController: UIViewController,
         tableView.register(TodoListCell.self, forCellReuseIdentifier: TodoListCell.reuseIdentifier)
         tableView.separatorColor = .appStroke
         tableView.separatorInset = .init(top: 0, left: 20, bottom: 0, right: 20)
+        tableView.allowsSelection = false
         return tableView
     }()
     
@@ -135,22 +136,25 @@ final class TodoListViewController: UIViewController,
     ) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) { _ in
             let editAction = UIAction(
-                title: "Редактировать",
-                image: .iconContextMenuEdit) { _ in
-                    // todo edit
+                title: ContextMenu.edit.rawValue,
+                image: .iconContextMenuEdit) { [weak self] _ in
+                    guard let self else { return }
+                    self.presenter.didTappedEditMenuOption(option: .edit, at: indexPath.row)
                 }
             
             let shareAction = UIAction(
-                title: "Поделиться",
-                image: .iconContextMenuShare) { _ in
-                    // todo share
+                title: ContextMenu.share.rawValue,
+                image: .iconContextMenuShare) { [weak self] _ in
+                    guard let self else { return }
+                    self.presenter.didTappedEditMenuOption(option: .share, at: indexPath.row)
                 }
             
             let deleteAction = UIAction(
-                title: "Удалить",
+                title: ContextMenu.delete.rawValue,
                 image: .iconContextMenuDelete,
-                attributes: .destructive) { _ in
-                    // todo delete
+                attributes: .destructive) { [weak self] _ in
+                    guard let self else { return }
+                    self.presenter.didTappedEditMenuOption(option: .delete, at: indexPath.row)
                 }
             
             return UIMenu(title: "", children: [editAction, shareAction, deleteAction])

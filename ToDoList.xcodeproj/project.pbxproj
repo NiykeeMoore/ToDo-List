@@ -29,6 +29,7 @@
 		4B9DC82B2D995509000F42E2 /* TodoDetailInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC82A2D995509000F42E2 /* TodoDetailInteractor.swift */; };
 		4B9DC82D2D99B857000F42E2 /* TodoListModuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC82C2D99B857000F42E2 /* TodoListModuleBuilder.swift */; };
 		4B9DC82F2D99B9E7000F42E2 /* TodoDetailModuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC82E2D99B9E7000F42E2 /* TodoDetailModuleBuilder.swift */; };
+		4B9DC8312D99D16A000F42E2 /* ContextMenuOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8302D99D16A000F42E2 /* ContextMenuOptions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		4B9DC82A2D995509000F42E2 /* TodoDetailInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoDetailInteractor.swift; sourceTree = "<group>"; };
 		4B9DC82C2D99B857000F42E2 /* TodoListModuleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListModuleBuilder.swift; sourceTree = "<group>"; };
 		4B9DC82E2D99B9E7000F42E2 /* TodoDetailModuleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoDetailModuleBuilder.swift; sourceTree = "<group>"; };
+		4B9DC8302D99D16A000F42E2 /* ContextMenuOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuOptions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +181,7 @@
 			isa = PBXGroup;
 			children = (
 				4B9DC8172D9870BC000F42E2 /* Todo.swift */,
+				4B9DC8302D99D16A000F42E2 /* ContextMenuOptions.swift */,
 			);
 			path = Domian;
 			sourceTree = "<group>";
@@ -286,6 +289,7 @@
 				4B9DC8272D994F26000F42E2 /* TodoDetailRouter.swift in Sources */,
 				4B9DC8252D994CB9000F42E2 /* TodoDetailViewController.swift in Sources */,
 				4B9DC81C2D987370000F42E2 /* TodoListRouterImpl.swift in Sources */,
+				4B9DC8312D99D16A000F42E2 /* ContextMenuOptions.swift in Sources */,
 				4B9DC8062D984174000F42E2 /* TodoListCell.swift in Sources */,
 				4B9DC8182D9870BC000F42E2 /* Todo.swift in Sources */,
 			);

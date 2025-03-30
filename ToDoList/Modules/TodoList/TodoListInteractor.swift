@@ -10,11 +10,14 @@ import Foundation
 protocol TodoInteractorInput {
     func fetchTodos()
     func toggleTodoComplition(at index: Int)
+    func shareTodo(todo: Todo)
+    func deleteTodo(at index: Int)
 }
 
 protocol TodoInteractorOutput: AnyObject {
     func didFetchTodos(todos: [Todo])
     func didFailToFetchTodos(error: Error)
+    func prepareToShare(todo: Todo)
 }
 
 final class TodoListInteractor: TodoInteractorInput {
@@ -50,6 +53,19 @@ final class TodoListInteractor: TodoInteractorInput {
     func toggleTodoComplition(at index: Int) {
         let updatedTask = todos[index].withUpdatedComplition(isCompleted: !todos[index].isCompleted)
         todos[index] = updatedTask
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.presenter?.didFetchTodos(todos: self.todos)
+        }
+    }
+    
+    func shareTodo(todo: Todo) {
+        presenter?.prepareToShare(todo: todo)
+    }
+    
+    func deleteTodo(at index: Int) {
+        todos.remove(at: index)
         
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }

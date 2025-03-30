@@ -12,8 +12,10 @@ protocol TodosLoading {
 }
 
 struct TodosLoader: TodosLoading {
+    // MARK: - Dependencies
     private let networkClient: NetworkRouting
     
+    // MARK: - Properties
     private var dummyTodos: URL {
         guard let url = URL(string: "https://dummyjson.com/todos") else {
             preconditionFailure("Некорректный URL")
@@ -21,18 +23,25 @@ struct TodosLoader: TodosLoading {
         return url
     }
     
+    // MARK: - Initialization
     init(networkClient: NetworkRouting) {
         self.networkClient = networkClient
     }
     
+    // MARK: - TodosLoading
     func load(handler: @escaping (Result<[Todo], any Error>) -> Void) {
         networkClient.fetch(url: dummyTodos) { result in
             switch result {
             case .success(let data):
                 do {
                     let decoded = try JSONDecoder().decode(TodosResponse.self, from: data)
-                    let tasks = decoded.todos.map { $0.toDomain() }
-                    handler(.success(tasks))
+                    let todos = decoded.todos.map {
+                        $0.toDomain(
+                            description: getDescription(by: $0.id),
+                            dateOfCreation: generateRandomDate()
+                        )
+                    }
+                    handler(.success(todos))
                 } catch {
                     handler(.failure(error))
                 }
@@ -42,7 +51,8 @@ struct TodosLoader: TodosLoading {
         }
     }
     
-    private func getDescription(for task: Todo) -> String {
+    // MARK: - Helpers methods
+    private func getDescription(by id: Int) -> String {
         let todoDescriptions: [Int: String] = [
             1: "This task encourages you to do something kind for someone special. A small act of kindness can brighten both your day and theirs.",
             2: "Memorize a poem to enrich your mind. Let the rhythm and words inspire you.",
@@ -76,18 +86,25 @@ struct TodosLoader: TodosLoading {
             30: "Go to the gym to improve your fitness and energy. Consistent workouts lead to a healthier body and mind."
         ]
         
-        guard let description = todoDescriptions[task.id] else { return "Ошибка в определении описания" }
+        guard let description = todoDescriptions[id] else { return "Ошибка в определении описания" }
         return description
     }
     
-    private func generateRandomDate() -> Date {
+    private func generateRandomDate() -> String {
         let today = Date()
         guard let threeDaysAgo = Calendar.current.date(byAdding: .day, value: -5, to: today) else {
-            return today
+            return customDateFormat(with: today)
         }
         
         let interval = today.timeIntervalSince(threeDaysAgo)
         let randomInterval = TimeInterval(arc4random_uniform(UInt32(interval)))
-        return threeDaysAgo.addingTimeInterval(randomInterval)
+        let date = threeDaysAgo.addingTimeInterval(randomInterval)
+        return customDateFormat(with: date)
+    }
+    
+    private func customDateFormat(with date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        return dateFormatter.string(from: date)
     }
 }

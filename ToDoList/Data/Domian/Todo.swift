@@ -10,5 +10,7 @@ import Foundation
 struct Todo {
     let id: Int
     let title: String
+    let description: String
+    let dateofCreation: String
     let isCompleted: Bool
 }

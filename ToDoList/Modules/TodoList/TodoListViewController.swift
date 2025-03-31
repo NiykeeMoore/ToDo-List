@@ -70,6 +70,11 @@ final class TodoListViewController: UIViewController,
         customTabBar.delegate = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        presenter.viewDidLoad()
+    }
+    
     // MARK: - UI Setup
     private func configureUI() {
         navigationController?.navigationBar.prefersLargeTitles = true

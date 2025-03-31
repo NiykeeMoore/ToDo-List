@@ -33,9 +33,7 @@ final class CoreDataStore: TodoStoring {
                 let entities = try context.fetch(fetchRequest)
                 let todos = entities.compactMap { self.mapEntityToDomain($0) }
                  completion(.success(todos))
-                 print("Fetched \(todos.count) todos from CoreData.")
             } catch {
-                print("Failed to fetch todos: \(error)")
                  completion(.failure(error))
             }
         }
@@ -55,22 +53,18 @@ final class CoreDataStore: TodoStoring {
 
                 if let existingEntity = results.first { // обновление
                     entity = existingEntity
-                    print("Updating existing TodoEntity with id: \(todo.id)")
                 } else { // создание
                     entity = TodoEntity(context: context)
-                    print("Creating new TodoEntity with id: \(todo.id)")
                 }
                 
                 self.updateEntity(entity, from: todo)
                 
                 try context.save()
-                print("Background context saved for id: \(todo.id)")
 
                 DispatchQueue.main.async {
                     completion(.success(()))
                 }
             } catch {
-                print("Failed to save todo (id: \(todo.id)): \(error)")
                 DispatchQueue.main.async {
                     completion(.failure(error))
                 }
@@ -87,16 +81,12 @@ final class CoreDataStore: TodoStoring {
             do {
                 if let entityToDelete = try context.fetch(fetchRequest).first {
                     context.delete(entityToDelete)
-                    print("Deleting TodoEntity with id: \(id)")
                     try context.save()
-                     print("Background context saved after deletion of id: \(id)")
                     DispatchQueue.main.async { completion(.success(())) }
                 } else {
-                    print("TodoEntity with id \(id) not found for deletion.")
                      DispatchQueue.main.async { completion(.success(())) }
                 }
             } catch {
-                 print("Failed to delete todo (id: \(id)): \(error)")
                  DispatchQueue.main.async { completion(.failure(error)) }
             }
         }
@@ -105,10 +95,7 @@ final class CoreDataStore: TodoStoring {
     private func mapEntityToDomain(_ entity: TodoEntity) -> Todo? {
         guard let id = entity.id,
               let title = entity.title,
-              let date = entity.dateOfCreation else {
-            print("Warning: Skipping entity due to missing mandatory fields.")
-            return nil
-        }
+              let date = entity.dateOfCreation else { return nil }
 
         return Todo(
             id: id,

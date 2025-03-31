@@ -224,12 +224,20 @@
 		4B9DC8382D9AB9F0000F42E2 /* Core Data */ = {
 			isa = PBXGroup;
 			children = (
+				4B9DC8452D9AC86D000F42E2 /* CDClasses */,
 				4B9DC8392D9ABA12000F42E2 /* CoreDataManager.swift */,
-				4B9DC83F2D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift */,
-				4B9DC8402D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift */,
 				4B9DC8432D9ABD9D000F42E2 /* CoreDataStoring.swift */,
 			);
 			path = "Core Data";
+			sourceTree = "<group>";
+		};
+		4B9DC8452D9AC86D000F42E2 /* CDClasses */ = {
+			isa = PBXGroup;
+			children = (
+				4B9DC83F2D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift */,
+				4B9DC8402D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift */,
+			);
+			path = CDClasses;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

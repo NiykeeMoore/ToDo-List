@@ -29,6 +29,17 @@ final class TodoDetailInteractor: TodoDetailInteractorInput {
     
     // MARK: - TodoDetailInteractorInput
     func saveTodo(todo: Todo) {
-        print("SAVED TODO: \(todo)")
+        todoStore.saveTodo(todo) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                print("Interactor: Сохранили todo с id \(todo.id)")
+                self.presenter?.didSaveTodoSuccessfully()
+            case .failure(let error):
+                // Произошла ошибка, сообщаем презентеру
+                print("Interactor: Ошибка сохранения todo с id \(todo.id). Ошибка: \(error)")
+                self.presenter?.didFailToSaveTodo(error: error)
+            }
+        }
     }
 }

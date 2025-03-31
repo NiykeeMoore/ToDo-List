@@ -19,7 +19,6 @@ final class TodoListViewController: UIViewController,
                                     UITableViewDelegate, UITableViewDataSource,
                                     UISearchResultsUpdating,
                                     TodoListViewInput,
-                                    CheckBoxDelegate,
                                     CustomTabBarDelegate {
     // MARK: - Dependencies
     private let presenter: TodoPresenterInput
@@ -112,14 +111,17 @@ final class TodoListViewController: UIViewController,
               let todo = presenter.getTodo(at: indexPath.row)
         else { return UITableViewCell() }
         
-        cell.checkBox.delegate = self
-        
         cell.configureCell(
             title: todo.title,
             description: todo.description,
             date: todo.dateOfCreation.formattedDisplayString,
             state: todo.isCompleted
         )
+        
+        cell.checkBox.didCheckBoxTapped = { [weak self] in
+            guard let self else { return }
+            self.presenter.checkboxDidTapped(at: indexPath.row)
+        }
         
         return cell
     }
@@ -227,24 +229,8 @@ final class TodoListViewController: UIViewController,
         })
     }
     
-    // MARK: - CheckBoxDelegate
-    func checkBoxDidTapped(checkBox: CheckBox) {
-        guard
-            let cell = checkBox.firstSuperview(of: TodoListCell.self),
-            let indexPath = todoListTableView.indexPath(for: cell) else { return }
-        
-        presenter.checkboxDidTapped(at: indexPath.row)
-    }
-    
     // MARK: - CustomTabBarDelegate
     func didTapCreateTodoButton() {
         presenter.didTappedCreateTodoButton()
-    }
-}
-
-/// Рекурсивно ходим по супервью пока не найдем объект который нам нужен
-extension UIView {
-    func firstSuperview<T: UIView>(of type: T.Type) -> T? {
-        return superview as? T ?? superview?.firstSuperview(of: T.self)
     }
 }

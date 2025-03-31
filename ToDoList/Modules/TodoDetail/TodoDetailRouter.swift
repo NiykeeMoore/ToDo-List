@@ -1,0 +1,21 @@
+//
+//  TodoDetailRouter.swift
+//  ToDoList
+//
+//  Created by Niykee Moore on 30.03.2025.
+//
+
+import UIKit
+
+protocol TodoDetailRouterInput: AnyObject {
+   func navigateBack()
+}
+
+final class TodoDetailRouter: TodoDetailRouterInput {
+    weak var view: UIViewController?
+    
+    func navigateBack() {
+        print("router close window")
+        self.view?.navigationController?.popViewController(animated: true)
+    }
+}

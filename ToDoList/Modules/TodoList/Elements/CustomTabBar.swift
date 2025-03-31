@@ -7,11 +7,22 @@
 
 import UIKit
 
+protocol CustomTabBarDelegate: AnyObject {
+    func didTapCreateTodoButton()
+}
+
 final class CustomTabBar: UIView {
+    weak var delegate: CustomTabBarDelegate?
+    
+    private var todosCount: Int = 0 {
+        didSet {
+            todosCounterLabel.text = "\(todosCount) Задач"
+        }
+    }
+    
     // MARK: - UI Elements
     private lazy var todosCounterLabel: UILabel = {
         let label = UILabel()
-        label.text = "7 Задач"
         label.textColor = .appWhite
         label.textAlignment = .center
         label.font = UIFont.systemFont(ofSize: 11)
@@ -22,6 +33,7 @@ final class CustomTabBar: UIView {
         let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
         button.tintColor = .appYellow
+        button.addTarget(self, action: #selector(createTodoButtonTapped), for: .touchUpInside)
         return button
     }()
     
@@ -48,5 +60,14 @@ final class CustomTabBar: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func updateTodoCounterLabel(_ count: Int) {
+        todosCount = count
+    }
+    
+    //MARK: - Actions
+    @objc func createTodoButtonTapped() {
+        delegate?.didTapCreateTodoButton()
     }
 }

@@ -9,18 +9,19 @@ import UIKit
 
 enum TodoListModuleBuilder {
     static func createModule() -> UIViewController {
-        let networkClient = NetworkClient()
-        let todosLoader = TodosLoader(networkClient: networkClient)
-        
-        let interactor = TodoListInteractor(todosLoader: todosLoader)
-        let presesenter = TodoListPresenter(interactor: interactor)
-        let view = TodoListViewController(presenter: presesenter)
-        let router = TodoListRouterImpl()
-        
-        presesenter.viewController = view
-        presesenter.router = router
-        interactor.presenter = presesenter
+        let networkClient: NetworkRouting = NetworkClient()
+        let todosLoader: TodosLoading = TodosLoader(networkClient: networkClient)
+
+        var interactor: TodoInteractorInput = TodoListInteractor(todosLoader: todosLoader)
+        let presenter: TodoListPresenter & TodoInteractorOutput = TodoListPresenter(interactor: interactor)
+        let view = TodoListViewController(presenter: presenter)
+        let router: TodoListRouter = TodoListRouterImpl()
+
+        presenter.viewController = view
+        presenter.router = router
+        interactor.presenter = presenter
         router.viewController = view
+
         return view
     }
 }

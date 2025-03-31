@@ -8,10 +8,10 @@
 import Foundation
 
 struct Todo {
-    let id: Int
+    let id: String
     let title: String
     let description: String
-    let dateOfCreation: String
+    let dateOfCreation: Date
     let isCompleted: Bool
     
     func withUpdatedComplition(isCompleted: Bool) -> Self {

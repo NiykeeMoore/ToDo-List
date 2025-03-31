@@ -7,16 +7,12 @@
 
 import UIKit
 
-final class TodoListCell: UITableViewCell, CheckBoxDelegate {
+final class TodoListCell: UITableViewCell {
     // MARK: - Properties
     static let reuseIdentifier = String(describing: TodoListCell.self)
-    private var isCompleted: Bool = false
+
     // MARK: - UI Elements
-    lazy var checkBox: CheckBox = {
-        let checkbox = CheckBox()
-        checkbox.delegate = self
-        return checkbox
-    }()
+    lazy var checkBox = CheckBox()
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -70,11 +66,11 @@ final class TodoListCell: UITableViewCell, CheckBoxDelegate {
     
     // MARK: - prepareForReuse
     override func prepareForReuse() {
+        super.prepareForReuse()
         titleLabel.text = nil
         descriptionLabel.text = nil
         dateOfCreationLabel.text = nil
-        isCompleted = false
-        checkBox.isSelected = isCompleted
+        checkBox.setState(false)
     }
     
     // MARK: - UI Setup
@@ -112,10 +108,5 @@ final class TodoListCell: UITableViewCell, CheckBoxDelegate {
         descriptionLabel.text = description
         dateOfCreationLabel.text = date
         checkBox.setState(state)
-    }
-    
-    func checkBoxDidTapped(checkBox: CheckBox) {
-        isCompleted.toggle()
-        checkBox.setState(isCompleted)
     }
 }

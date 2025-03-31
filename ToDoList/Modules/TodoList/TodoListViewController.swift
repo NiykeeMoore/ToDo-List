@@ -8,21 +8,20 @@
 import UIKit
 
 protocol TodoListViewInput: AnyObject {
-    func todosLoaded(todos: [Todo])
+    func reloadData(todoCount: Int)
     func displayError(error: Error)
+    func reloadRow(at index: Int, todoCount: Int)
+    func deleteRow(at index: Int, todoCount: Int)
+    func showShare(for todo: Todo)
 }
 
 final class TodoListViewController: UIViewController,
                                     UITableViewDelegate, UITableViewDataSource,
                                     UISearchResultsUpdating,
                                     TodoListViewInput,
-                                    CheckBoxDelegate,
                                     CustomTabBarDelegate {
     // MARK: - Dependencies
     private let presenter: TodoPresenterInput
-    
-    // MARK: - Properties
-    private var todos: [Todo] = []
     
     // MARK: - UI Elements
     private lazy var todoListTableView: UITableView = {
@@ -104,22 +103,25 @@ final class TodoListViewController: UIViewController,
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todos.count
+        return presenter.numberOfRows()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier) as? TodoListCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier, for: indexPath) as? TodoListCell,
+              let todo = presenter.getTodo(at: indexPath.row)
         else { return UITableViewCell() }
         
-        cell.checkBox.delegate = self
-        
-        let todo = todos[indexPath.row]
         cell.configureCell(
             title: todo.title,
             description: todo.description,
-            date: todo.dateOfCreation,
+            date: todo.dateOfCreation.formattedDisplayString,
             state: todo.isCompleted
         )
+        
+        cell.checkBox.didCheckBoxTapped = { [weak self] in
+            guard let self else { return }
+            self.presenter.checkboxDidTapped(at: indexPath.row)
+        }
         
         return cell
     }
@@ -195,10 +197,9 @@ final class TodoListViewController: UIViewController,
     }
     
     // MARK: - TodoListViewInput
-    func todosLoaded(todos: [Todo]) {
-        self.todos = todos
+    func reloadData(todoCount: Int) {
         todoListTableView.reloadData()
-        customTabBar.updateTodoCounterLabel(todos.count)
+        customTabBar.updateTodoCounterLabel(todoCount)
     }
     
     func displayError(error: any Error) {
@@ -209,24 +210,78 @@ final class TodoListViewController: UIViewController,
         present(alert, animated: true)
     }
     
-    // MARK: - CheckBoxDelegate
-    func checkBoxDidTapped(checkBox: CheckBox) {
-        guard
-            let cell = checkBox.firstSuperview(of: TodoListCell.self),
-            let indexPath = todoListTableView.indexPath(for: cell) else { return }
-        
-        presenter.checkboxDidTapped(at: indexPath.row)
+    func reloadRow(at index: Int, todoCount: Int) {
+        let indexPath = IndexPath(row: index, section: 0)
+        if todoListTableView.indexPathsForVisibleRows?.contains(indexPath) ?? false {
+            todoListTableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        customTabBar.updateTodoCounterLabel(todoCount)
     }
     
+    func deleteRow(at index: Int, todoCount: Int) {
+        let indexPath = IndexPath(row: index, section: 0)
+        
+        todoListTableView.performBatchUpdates({
+            todoListTableView.deleteRows(at: [indexPath], with: .automatic)
+        }, completion: { [weak self] _ in
+            guard let self else { return }
+            self.customTabBar.updateTodoCounterLabel(todoCount)
+        })
+    }
+    
+    func showShare(for todo: Todo) {
+        var sourceViewForPopover: UIView? = nil
+        if let index = presenter.getIndex(for: todo.id) {
+            let indexPath = IndexPath(row: index, section: 0)
+            sourceViewForPopover = todoListTableView.cellForRow(at: indexPath)
+        }
+        
+        presenter.router?.showShareScreen(
+            with: todo.title,
+            sourceView: sourceViewForPopover,
+            sourceRect: sourceViewForPopover?.bounds
+        )
+        // Давай сделаем так: Presenter должен иметь метод для вызова share роутера.
+
+        // --- ПЕРЕДЕЛЫВАЕМ ЛОГИКУ SHARE ЕЩЕ РАЗ ---
+
+        // 1. Убираем showShare из ViewInput
+        // protocol TodoListViewInput: AnyObject {
+        //     ...
+        //     // func showShare(for todo: Todo) // УБИРАЕМ
+        // }
+        // final class TodoListViewController: /*...*/ {
+        //     // func showShare(for todo: Todo) { ... } // УБИРАЕМ
+        // }
+
+        // 2. Возвращаем вызов interactor.shareTodo/prepareToShare? Нет, это не даст нам sourceView.
+
+        // 3. Добавляем метод в Presenter Input, который принимает sourceView/Rect
+         // protocol TodoPresenterInput: AnyObject {
+         //    ...
+         //    func shareTodo(_ todo: Todo, sourceView: UIView?, sourceRect: CGRect?)
+         //    ...
+         // }
+
+        // 4. Presenter вызывает Router
+         // final class TodoListPresenter: TodoPresenterInput /*...*/ {
+         //    func shareTodo(_ todo: Todo, sourceView: UIView?, sourceRect: CGRect?) {
+         //        router?.showShareScreen(with: todo.title, sourceView: sourceView, sourceRect: sourceRect)
+         //    }
+         // }
+
+        // 5. View вызывает этот новый метод Presenter'а из context menu action
+         // В TodoListViewController, в обработчике shareAction контекстного меню:
+         // let shareAction = UIAction(...) { [weak self] _ in
+         //     guard let self, let todo = self.presenter.getTodo(at: indexPath.row) else { return }
+         //     // Находим sourceView/Rect для popover'а
+         //     let cell = self.todoListTableView.cellForRow(at: indexPath)
+         //     self.presenter.shareTodo(todo, sourceView: cell, sourceRect: cell?.bounds)
+         // }
+    }
+        
     // MARK: - CustomTabBarDelegate
     func didTapCreateTodoButton() {
         presenter.didTappedCreateTodoButton()
-    }
-}
-
-/// Рекурсивно ходим по супервью пока не найдем объект который нам нужен
-extension UIView {
-    func firstSuperview<T: UIView>(of type: T.Type) -> T? {
-        return superview as? T ?? superview?.firstSuperview(of: T.self)
     }
 }

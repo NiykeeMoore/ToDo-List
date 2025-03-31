@@ -5,11 +5,14 @@
 //  Created by Niykee Moore on 30.03.2025.
 //
 
-import UIKit
+import Foundation
 
 protocol TodoDetailPresenterInput: AnyObject {
+    var viewController: TodoDetailViewInput? { get set }
+    var router: TodoDetailRouterInput? { get set }
+    var interactor: TodoDetailInteractorInput? { get set }
     func viewDidLoad()
-    func buttonBackPressed(save todo: Todo?)
+    func buttonBackPressed(currentTitle: String?, currentDescription: String?)
 }
 
 final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorOutput {
@@ -31,11 +34,12 @@ final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorO
         if let existingTodo = todo {
             viewController?.todoLoaded(existingTodo)
         } else {
+            let today = Date()
             let emptyTodo = Todo(
-                id: 0,
+                id: UUID().uuidString,
                 title: "",
                 description: "",
-                dateOfCreation: customTodayDate(),
+                dateOfCreation: today,
                 isCompleted: false
             )
             self.todo = emptyTodo
@@ -43,16 +47,29 @@ final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorO
         }
     }
     
-    func buttonBackPressed(save savedTodo: Todo?) {
-        if let savedTodo {
-            interactor?.saveTodo(todo: savedTodo)
+    func buttonBackPressed(currentTitle: String?, currentDescription: String?) {
+        let title = currentTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let description = currentDescription ?? ""
+        guard let originalTodo = self.todo else {
+            router?.navigateBack()
+            return
+        }
+        
+        let isNewTaskAndEmpty = (originalTodo.title.isEmpty && originalTodo.description.isEmpty && title.isEmpty)
+        
+        let hasChanges = originalTodo.title != title || originalTodo.description != description
+        let shouldSave = hasChanges && !isNewTaskAndEmpty  // не сохраняем пустую todo
+        
+        if shouldSave {
+            let todoToSave = Todo(
+                id: originalTodo.id,
+                title: title,
+                description: description,
+                dateOfCreation: originalTodo.dateOfCreation,
+                isCompleted: originalTodo.isCompleted
+            )
+            interactor?.saveTodo(todo: todoToSave)
         }
         router?.navigateBack()
-    }
-    
-    private func customTodayDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        return dateFormatter.string(from: Date())
     }
 }

@@ -7,13 +7,9 @@
 
 import UIKit
 
-protocol CheckBoxDelegate: AnyObject {
-    func checkBoxDidTapped(checkBox: CheckBox)
-}
-
 final class CheckBox: UIButton {
     // MARK: - Properties
-    weak var delegate: CheckBoxDelegate?
+    var didCheckBoxTapped: (() -> Void)?
     
     // MARK: - Initialization
     override init(frame: CGRect) {
@@ -34,6 +30,6 @@ final class CheckBox: UIButton {
     
     // MARK: - Action
     @objc private func checkboxTapped() {
-        delegate?.checkBoxDidTapped(checkBox: self)
+        didCheckBoxTapped?()
     }
 }

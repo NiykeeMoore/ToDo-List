@@ -15,9 +15,9 @@ struct TodoItemDTO: Codable {
 }
 
 extension TodoItemDTO {
-    func toDomain(description: String, dateOfCreation: String) -> Todo {
+    func toDomain(description: String, dateOfCreation: Date) -> Todo {
         return Todo(
-            id: id,
+            id: String(self.id),
             title: todo,
             description: description,
             dateOfCreation: dateOfCreation,

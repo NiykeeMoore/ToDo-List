@@ -15,9 +15,6 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
     // MARK: - Dependencies
     var presenter: TodoDetailPresenterInput?
     
-    // MARK: - Properties
-    var todo: Todo?
-    
     // MARK: - UI Elements
     private lazy var titleTextField: UITextField = {
         let textField = UITextField()
@@ -96,25 +93,18 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
     }
     
     func todoLoaded(_ todo: Todo?) {
-        self.todo = todo
         titleTextField.text = todo?.title
         descriptionTextView.text = todo?.description
-        dateLabel.text = todo?.dateOfCreation
+        dateLabel.text = todo?.dateOfCreation.formattedDisplayString
     }
     
     @objc private func backButtonTapped() {
-        guard let currentTask = todo,
-              let newTitle = titleTextField.text, !newTitle.isEmpty,
-              let newDescription = descriptionTextView.text else {
-            presenter?.buttonBackPressed(save: nil)
+        guard
+            let newTitle = titleTextField.text, !newTitle.isEmpty,
+            let newDescription = descriptionTextView.text else {
+            presenter?.buttonBackPressed(currentTitle: nil, currentDescription: nil)
             return
         }
-        if currentTask.title == newTitle && currentTask.description == newDescription {
-            presenter?.buttonBackPressed(save: nil)
-        } else {
-            let updatedTask = currentTask.withUpdatedTitle(title: newTitle)
-                .withUpdatedDescription(description: newDescription)
-            presenter?.buttonBackPressed(save: updatedTask)
-        }
+        presenter?.buttonBackPressed(currentTitle: newTitle, currentDescription: newDescription)
     }
 }

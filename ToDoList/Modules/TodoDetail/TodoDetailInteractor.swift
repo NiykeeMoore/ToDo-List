@@ -9,6 +9,7 @@ import Foundation
 
 protocol TodoDetailInteractorInput: AnyObject {
     func saveTodo(todo: Todo)
+    var presenter: TodoDetailInteractorOutput? { get set }
 }
 
 protocol TodoDetailInteractorOutput: AnyObject {
@@ -27,6 +28,7 @@ final class TodoDetailInteractor: TodoDetailInteractorInput {
         self.todo = todo
     }
     
+    // MARK: - TodoDetailInteractorInput
     func saveTodo(todo: Todo) {
         print("SAVED TODO: \(todo)")
     }

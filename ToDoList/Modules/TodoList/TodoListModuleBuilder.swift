@@ -8,7 +8,7 @@
 import UIKit
 
 enum TodoListModuleBuilder {
-    static func createModule() -> UIViewController {
+    static func createModule(coreDataManager: CoreDataManaging) -> UIViewController {
         let networkClient: NetworkRouting = NetworkClient()
         let todosLoader: TodosLoading = TodosLoader(networkClient: networkClient)
 

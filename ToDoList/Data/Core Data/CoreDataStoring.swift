@@ -26,7 +26,7 @@ final class CoreDataStore: TodoStoring {
 
         context.perform {
             let fetchRequest = NSFetchRequest<TodoEntity>(entityName: "TodoEntity")
-            let sortDescriptor = NSSortDescriptor(keyPath: \TodoEntity.dateOfCreation, ascending: true)
+            let sortDescriptor = NSSortDescriptor(keyPath: \TodoEntity.dateOfCreation, ascending: false)
             fetchRequest.sortDescriptors = [sortDescriptor]
 
             do {

@@ -8,7 +8,7 @@
 import UIKit
 
 protocol TodoListViewInput: AnyObject {
-    func todosLoaded(todos: [Todo])
+    func reloadData(todoCount: Int)
     func displayError(error: Error)
 }
 
@@ -20,9 +20,6 @@ final class TodoListViewController: UIViewController,
                                     CustomTabBarDelegate {
     // MARK: - Dependencies
     private let presenter: TodoPresenterInput
-    
-    // MARK: - Properties
-    private var todos: [Todo] = []
     
     // MARK: - UI Elements
     private lazy var todoListTableView: UITableView = {
@@ -104,7 +101,7 @@ final class TodoListViewController: UIViewController,
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todos.count
+        return presenter.numberOfRows()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -113,7 +110,7 @@ final class TodoListViewController: UIViewController,
         
         cell.checkBox.delegate = self
         
-        let todo = todos[indexPath.row]
+        let todo = presenter.getTodo(at: indexPath.row)
         cell.configureCell(
             title: todo.title,
             description: todo.description,
@@ -195,10 +192,9 @@ final class TodoListViewController: UIViewController,
     }
     
     // MARK: - TodoListViewInput
-    func todosLoaded(todos: [Todo]) {
-        self.todos = todos
+    func reloadData(todoCount: Int) {
         todoListTableView.reloadData()
-        customTabBar.updateTodoCounterLabel(todos.count)
+        customTabBar.updateTodoCounterLabel(todoCount)
     }
     
     func displayError(error: any Error) {

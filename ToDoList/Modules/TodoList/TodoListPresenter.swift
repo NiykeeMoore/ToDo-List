@@ -12,6 +12,8 @@ protocol TodoPresenterInput {
     func checkboxDidTapped(at index: Int)
     func didTappedCreateTodoButton()
     func didTappedEditMenuOption(option: ContextMenu, at index: Int)
+    func numberOfRows() -> Int
+    func getTodo(at index: Int) -> Todo
 }
 
 final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
@@ -54,10 +56,18 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         }
     }
     
+    func numberOfRows() -> Int {
+        return todos.count
+    }
+    
+    func getTodo(at index: Int) -> Todo {
+        return todos[index]
+    }
+    
     // MARK: - TodoInteractorOutput
     func didFetchTodos(todos: [Todo]) {
         self.todos = todos
-        viewController?.todosLoaded(todos: todos)
+        viewController?.reloadData(todoCount: todos.count)
     }
     
     func didFailToFetchTodos(error: Error) {

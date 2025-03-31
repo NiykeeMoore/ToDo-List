@@ -9,15 +9,17 @@ import UIKit
 
 protocol TodoListRouter: AnyObject {
     var viewController: UIViewController? { get set }
-    func navigateToTodoDetail(with todo: Todo?)
+    func navigateToTodoDetail(with todo: Todo?, coreDataManager: CoreDataManaging)
     func showShareScreen(with content: String, sourceView: UIView?, sourceRect: CGRect?)
 }
 
 final class TodoListRouterImpl: TodoListRouter {
+    //MARK: - Properties
     weak var viewController: UIViewController?
     
-    func navigateToTodoDetail(with todo: Todo?) {
-        let detailViewController = TodoDetailModuleBuilder.createModule(with: todo)
+    //MARK: - TodoListRouter
+    func navigateToTodoDetail(with todo: Todo?, coreDataManager: CoreDataManaging) {
+        let detailViewController = TodoDetailModuleBuilder.createModule(with: todo, coreDataManager: coreDataManager)
         viewController?.navigationController?.pushViewController(detailViewController, animated: true)
     }
     

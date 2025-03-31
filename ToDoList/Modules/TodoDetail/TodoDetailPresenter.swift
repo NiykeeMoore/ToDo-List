@@ -72,4 +72,14 @@ final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorO
         }
         router?.navigateBack()
     }
+    
+    // MARK: - TodoDetailInteractorOutput
+    func didSaveTodoSuccessfully() {
+        print("Presenter: Todo saved successfully.")
+    }
+    
+    func didFailToSaveTodo(error: any Error) {
+        print("Presenter: Failed to save todo. Error: \(error)")
+        viewController?.displaySaveError(error)
+    }
 }

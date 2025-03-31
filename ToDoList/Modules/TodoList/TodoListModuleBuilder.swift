@@ -11,9 +11,10 @@ enum TodoListModuleBuilder {
     static func createModule(coreDataManager: CoreDataManaging) -> UIViewController {
         let networkClient: NetworkRouting = NetworkClient()
         let todosLoader: TodosLoading = TodosLoader(networkClient: networkClient)
-
-        var interactor: TodoInteractorInput = TodoListInteractor(todosLoader: todosLoader)
-        let presenter: TodoListPresenter & TodoInteractorOutput = TodoListPresenter(interactor: interactor)
+        let todoStore: TodoStoring = CoreDataStore(manager: coreDataManager)
+        
+        var interactor: TodoInteractorInput = TodoListInteractor(todosLoader: todosLoader, todoStore: todoStore)
+        let presenter: TodoListPresenter & TodoInteractorOutput = TodoListPresenter(interactor: interactor, coreDataManager: coreDataManager)
         let view = TodoListViewController(presenter: presenter)
         let router: TodoListRouter = TodoListRouterImpl()
 

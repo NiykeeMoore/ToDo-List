@@ -25,14 +25,16 @@ final class TodoListInteractor: TodoInteractorInput {
     // MARK: - Dependencies
     weak var presenter: TodoInteractorOutput?
     private let todosLoader: TodosLoading
+    private let todoStore: TodoStoring
     
     // MARK: - Properties
     private var todos: [Todo] = []
     private let dataQueue = DispatchQueue(label: "background.queue.for.data.update", qos: .userInitiated)
 
     // MARK: - Initialization
-    init(todosLoader: TodosLoading) {
+    init(todosLoader: TodosLoading, todoStore: TodoStoring) {
         self.todosLoader = todosLoader
+        self.todoStore = todoStore
     }
     
     //MARK: - TodoInteractorInput

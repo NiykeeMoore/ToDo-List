@@ -9,6 +9,7 @@ import UIKit
 
 protocol TodoDetailViewInput: AnyObject {
     func todoLoaded(_ todo: Todo?)
+    func displaySaveError(_ error: Error)
 }
 
 final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
@@ -92,10 +93,21 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
         ])
     }
     
+    //MARK: - TodoDetailViewInput
     func todoLoaded(_ todo: Todo?) {
         titleTextField.text = todo?.title
         descriptionTextView.text = todo?.description
         dateLabel.text = todo?.dateOfCreation.formattedDisplayString
+    }
+    
+    func displaySaveError(_ error: Error) {
+        let alert = UIAlertController(
+            title: "Ошибка сохранения",
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
     
     @objc private func backButtonTapped() {

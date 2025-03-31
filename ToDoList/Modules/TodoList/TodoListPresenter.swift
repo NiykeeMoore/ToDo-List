@@ -23,13 +23,15 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     weak var viewController: TodoListViewInput?
     var interactor: TodoInteractorInput
     var router: TodoListRouter?
+    private let coreDataManager: CoreDataManaging
     
     // MARK: - Properties
     private var todos: [Todo] = []
     
     // MARK: - Initialization
-    init(interactor: TodoInteractorInput) {
+    init(interactor: TodoInteractorInput, coreDataManager: CoreDataManaging) {
         self.interactor = interactor
+        self.coreDataManager = coreDataManager
     }
     
     // MARK: - TodoInteractorInput
@@ -42,7 +44,7 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     }
     
     func didTappedCreateTodoButton() {
-        router?.navigateToTodoDetail(with: nil)
+        router?.navigateToTodoDetail(with: nil, coreDataManager: coreDataManager)
     }
     
     func didTappedEditMenuOption(option: ContextMenu, at index: Int) {
@@ -53,7 +55,7 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         
         switch option {
         case .edit:
-            router?.navigateToTodoDetail(with: todo)
+            router?.navigateToTodoDetail(with: todo, coreDataManager: coreDataManager)
             
         case .share:
             viewController?.showShare(for: todo)

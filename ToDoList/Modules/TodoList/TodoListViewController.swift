@@ -10,6 +10,9 @@ import UIKit
 protocol TodoListViewInput: AnyObject {
     func reloadData(todoCount: Int)
     func displayError(error: Error)
+    
+    func reloadRow(at index: Int, todoCount: Int)
+    func deleteRow(at index: Int, todoCount: Int)
 }
 
 final class TodoListViewController: UIViewController,
@@ -105,7 +108,7 @@ final class TodoListViewController: UIViewController,
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier) as? TodoListCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier, for: indexPath) as? TodoListCell
         else { return UITableViewCell() }
         
         cell.checkBox.delegate = self
@@ -203,6 +206,25 @@ final class TodoListViewController: UIViewController,
                                       preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    func reloadRow(at index: Int, todoCount: Int) {
+        let indexPath = IndexPath(row: index, section: 0)
+        if todoListTableView.indexPathsForVisibleRows?.contains(indexPath) ?? false {
+            todoListTableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        customTabBar.updateTodoCounterLabel(todoCount)
+    }
+    
+    func deleteRow(at index: Int, todoCount: Int) {
+        let indexPath = IndexPath(row: index, section: 0)
+        
+        todoListTableView.performBatchUpdates({
+            todoListTableView.deleteRows(at: [indexPath], with: .automatic)
+        }, completion: { [weak self] _ in
+            guard let self else { return }
+            self.customTabBar.updateTodoCounterLabel(todoCount)
+        })
     }
     
     // MARK: - CheckBoxDelegate

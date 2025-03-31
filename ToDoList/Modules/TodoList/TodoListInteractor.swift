@@ -18,6 +18,9 @@ protocol TodoInteractorOutput: AnyObject {
     func didFetchTodos(todos: [Todo])
     func didFailToFetchTodos(error: Error)
     func prepareToShare(todo: Todo)
+    
+    func didUpdateTodo(at index: Int, with todo: Todo)
+    func didDeleteTodo(at index: Int)
 }
 
 final class TodoListInteractor: TodoInteractorInput {
@@ -70,7 +73,7 @@ final class TodoListInteractor: TodoInteractorInput {
             self.todos[index] = updatedTask
 
             DispatchQueue.main.async {
-                self.presenter?.didFetchTodos(todos: self.todos)
+                self.presenter?.didUpdateTodo(at: index, with: updatedTask)
             }
         }
     }
@@ -90,7 +93,7 @@ final class TodoListInteractor: TodoInteractorInput {
             self.todos.remove(at: index)
 
             DispatchQueue.main.async {
-                self.presenter?.didFetchTodos(todos: self.todos)
+                self.presenter?.didDeleteTodo(at: index)
             }
         }
     }

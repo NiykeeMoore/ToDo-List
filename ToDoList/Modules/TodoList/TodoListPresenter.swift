@@ -77,4 +77,16 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     func prepareToShare(todo: Todo) {
         router?.showShareScreen(with: todo.title)
     }
+    
+    func didUpdateTodo(at index: Int, with todo: Todo) {
+        guard todos.indices.contains(index) else { return }
+        self.todos[index] = todo
+        
+        viewController?.reloadRow(at: index, todoCount: self.todos.count)
+    }
+
+    func didDeleteTodo(at index: Int) {
+        self.todos.remove(at: index)
+        viewController?.deleteRow(at: index, todoCount: self.todos.count)
+    }
 }

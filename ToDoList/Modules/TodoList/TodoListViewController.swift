@@ -70,6 +70,11 @@ final class TodoListViewController: UIViewController,
         customTabBar.delegate = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        presenter.viewDidLoad()
+    }
+    
     // MARK: - UI Setup
     private func configureUI() {
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -241,43 +246,6 @@ final class TodoListViewController: UIViewController,
             sourceView: sourceViewForPopover,
             sourceRect: sourceViewForPopover?.bounds
         )
-        // Давай сделаем так: Presenter должен иметь метод для вызова share роутера.
-
-        // --- ПЕРЕДЕЛЫВАЕМ ЛОГИКУ SHARE ЕЩЕ РАЗ ---
-
-        // 1. Убираем showShare из ViewInput
-        // protocol TodoListViewInput: AnyObject {
-        //     ...
-        //     // func showShare(for todo: Todo) // УБИРАЕМ
-        // }
-        // final class TodoListViewController: /*...*/ {
-        //     // func showShare(for todo: Todo) { ... } // УБИРАЕМ
-        // }
-
-        // 2. Возвращаем вызов interactor.shareTodo/prepareToShare? Нет, это не даст нам sourceView.
-
-        // 3. Добавляем метод в Presenter Input, который принимает sourceView/Rect
-         // protocol TodoPresenterInput: AnyObject {
-         //    ...
-         //    func shareTodo(_ todo: Todo, sourceView: UIView?, sourceRect: CGRect?)
-         //    ...
-         // }
-
-        // 4. Presenter вызывает Router
-         // final class TodoListPresenter: TodoPresenterInput /*...*/ {
-         //    func shareTodo(_ todo: Todo, sourceView: UIView?, sourceRect: CGRect?) {
-         //        router?.showShareScreen(with: todo.title, sourceView: sourceView, sourceRect: sourceRect)
-         //    }
-         // }
-
-        // 5. View вызывает этот новый метод Presenter'а из context menu action
-         // В TodoListViewController, в обработчике shareAction контекстного меню:
-         // let shareAction = UIAction(...) { [weak self] _ in
-         //     guard let self, let todo = self.presenter.getTodo(at: indexPath.row) else { return }
-         //     // Находим sourceView/Rect для popover'а
-         //     let cell = self.todoListTableView.cellForRow(at: indexPath)
-         //     self.presenter.shareTodo(todo, sourceView: cell, sourceRect: cell?.bounds)
-         // }
     }
         
     // MARK: - CustomTabBarDelegate

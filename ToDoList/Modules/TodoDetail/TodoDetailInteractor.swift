@@ -13,23 +13,33 @@ protocol TodoDetailInteractorInput: AnyObject {
 }
 
 protocol TodoDetailInteractorOutput: AnyObject {
-    
+    func didSaveTodoSuccessfully()
+    func didFailToSaveTodo(error: Error)
 }
 
 final class TodoDetailInteractor: TodoDetailInteractorInput {
     // MARK: - Dependencies
     weak var presenter: TodoDetailInteractorOutput?
-    
-    // MARK: - Properties
-    private var todo: Todo?
+    private let todoStore: TodoStoring
     
     // MARK: - Initialization
-    init(todo: Todo?) {
-        self.todo = todo
+    init(todoStore: TodoStoring) {
+        self.todoStore = todoStore
     }
     
     // MARK: - TodoDetailInteractorInput
     func saveTodo(todo: Todo) {
-        print("SAVED TODO: \(todo)")
+        todoStore.saveTodo(todo) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                print("Interactor: Сохранили todo с id \(todo.id)")
+                self.presenter?.didSaveTodoSuccessfully()
+            case .failure(let error):
+                // Произошла ошибка, сообщаем презентеру
+                print("Interactor: Ошибка сохранения todo с id \(todo.id). Ошибка: \(error)")
+                self.presenter?.didFailToSaveTodo(error: error)
+            }
+        }
     }
 }

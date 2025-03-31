@@ -9,11 +9,12 @@ import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    let coreDataManager = CoreDataManager()
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let todoListModule = TodoListModuleBuilder.createModule()
+        let todoListModule = TodoListModuleBuilder.createModule(coreDataManager: coreDataManager)
         let window = UIWindow(windowScene: windowScene)
         
         let appearance = UINavigationBarAppearance()
@@ -29,6 +30,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         self.window = window
         window.makeKeyAndVisible()
+    }
+    
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        coreDataManager.saveViewContext()
     }
 }
 

@@ -35,6 +35,7 @@
 		4B9DC83A2D9ABA12000F42E2 /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8392D9ABA12000F42E2 /* CoreDataManager.swift */; };
 		4B9DC8412D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC83F2D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift */; };
 		4B9DC8422D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8402D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift */; };
+		4B9DC8442D9ABD9D000F42E2 /* CoreDataStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8432D9ABD9D000F42E2 /* CoreDataStoring.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,7 @@
 		4B9DC8392D9ABA12000F42E2 /* CoreDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataManager.swift; sourceTree = "<group>"; };
 		4B9DC83F2D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodoEntity+CoreDataClass.swift"; sourceTree = "<group>"; };
 		4B9DC8402D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TodoEntity+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		4B9DC8432D9ABD9D000F42E2 /* CoreDataStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStoring.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -225,6 +227,7 @@
 				4B9DC8392D9ABA12000F42E2 /* CoreDataManager.swift */,
 				4B9DC83F2D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift */,
 				4B9DC8402D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift */,
+				4B9DC8432D9ABD9D000F42E2 /* CoreDataStoring.swift */,
 			);
 			path = "Core Data";
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				4B9DC8312D99D16A000F42E2 /* ContextMenuOptions.swift in Sources */,
 				4B9DC8062D984174000F42E2 /* TodoListCell.swift in Sources */,
 				4B9DC8342D9A9DF9000F42E2 /* Date+Extensions.swift in Sources */,
+				4B9DC8442D9ABD9D000F42E2 /* CoreDataStoring.swift in Sources */,
 				4B9DC8412D9ABB4B000F42E2 /* TodoEntity+CoreDataClass.swift in Sources */,
 				4B9DC8422D9ABB4B000F42E2 /* TodoEntity+CoreDataProperties.swift in Sources */,
 				4B9DC8182D9870BC000F42E2 /* Todo.swift in Sources */,

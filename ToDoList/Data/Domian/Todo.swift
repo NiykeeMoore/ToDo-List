@@ -8,7 +8,7 @@
 import Foundation
 
 struct Todo {
-    let id: Int
+    let id: String
     let title: String
     let description: String
     let dateOfCreation: Date

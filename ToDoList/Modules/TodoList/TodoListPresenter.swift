@@ -5,7 +5,7 @@
 //  Created by Niykee Moore on 29.03.2025.
 //
 
-import UIKit
+import Foundation
 
 protocol TodoPresenterInput {
     func viewDidLoad()
@@ -13,7 +13,7 @@ protocol TodoPresenterInput {
     func didTappedCreateTodoButton()
     func didTappedEditMenuOption(option: ContextMenu, at index: Int)
     func numberOfRows() -> Int
-    func getTodo(at index: Int) -> Todo
+    func getTodo(at index: Int) -> Todo?
 }
 
 final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
@@ -44,12 +44,17 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     }
     
     func didTappedEditMenuOption(option: ContextMenu, at index: Int) {
+        guard let todo = getTodo(at: index) else {
+            assertionFailure("didTappedEditMenuOption: bad index for todo")
+            return
+        }
+        
         switch option {
         case .edit:
-            router?.navigateToTodoDetail(with: todos[index])
+            router?.navigateToTodoDetail(with: todo)
             
         case .share:
-            interactor.shareTodo(todo: todos[index])
+            interactor.shareTodo(todo: todo)
             
         case .delete:
             interactor.deleteTodo(at: index)
@@ -60,7 +65,11 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         return todos.count
     }
     
-    func getTodo(at index: Int) -> Todo {
+    func getTodo(at index: Int) -> Todo? {
+        guard todos.indices.contains(index) else {
+            assertionFailure("getTodo: bad index")
+            return nil
+        }
         return todos[index]
     }
     

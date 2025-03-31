@@ -30,6 +30,7 @@
 		4B9DC82D2D99B857000F42E2 /* TodoListModuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC82C2D99B857000F42E2 /* TodoListModuleBuilder.swift */; };
 		4B9DC82F2D99B9E7000F42E2 /* TodoDetailModuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC82E2D99B9E7000F42E2 /* TodoDetailModuleBuilder.swift */; };
 		4B9DC8312D99D16A000F42E2 /* ContextMenuOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8302D99D16A000F42E2 /* ContextMenuOptions.swift */; };
+		4B9DC8342D9A9DF9000F42E2 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9DC8332D9A9DF9000F42E2 /* Date+Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		4B9DC82C2D99B857000F42E2 /* TodoListModuleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListModuleBuilder.swift; sourceTree = "<group>"; };
 		4B9DC82E2D99B9E7000F42E2 /* TodoDetailModuleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoDetailModuleBuilder.swift; sourceTree = "<group>"; };
 		4B9DC8302D99D16A000F42E2 /* ContextMenuOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuOptions.swift; sourceTree = "<group>"; };
+		4B9DC8332D9A9DF9000F42E2 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +92,7 @@
 		4B13992F2D9837AA001973F5 /* ToDoList */ = {
 			isa = PBXGroup;
 			children = (
+				4B9DC8322D9A9DDE000F42E2 /* Utill */,
 				4B9DC80A2D986BC3000F42E2 /* Data */,
 				4B9DC8002D984089000F42E2 /* Modules */,
 				4B9DC7FF2D983F55000F42E2 /* Assets */,
@@ -198,6 +201,14 @@
 			path = TodoDetail;
 			sourceTree = "<group>";
 		};
+		4B9DC8322D9A9DDE000F42E2 /* Utill */ = {
+			isa = PBXGroup;
+			children = (
+				4B9DC8332D9A9DF9000F42E2 /* Date+Extensions.swift */,
+			);
+			path = Utill;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -291,6 +302,7 @@
 				4B9DC81C2D987370000F42E2 /* TodoListRouterImpl.swift in Sources */,
 				4B9DC8312D99D16A000F42E2 /* ContextMenuOptions.swift in Sources */,
 				4B9DC8062D984174000F42E2 /* TodoListCell.swift in Sources */,
+				4B9DC8342D9A9DF9000F42E2 /* Date+Extensions.swift in Sources */,
 				4B9DC8182D9870BC000F42E2 /* Todo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

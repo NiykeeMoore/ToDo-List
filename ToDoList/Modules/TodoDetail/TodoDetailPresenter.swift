@@ -5,7 +5,7 @@
 //  Created by Niykee Moore on 30.03.2025.
 //
 
-import UIKit
+import Foundation
 
 protocol TodoDetailPresenterInput: AnyObject {
     func viewDidLoad()
@@ -31,11 +31,12 @@ final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorO
         if let existingTodo = todo {
             viewController?.todoLoaded(existingTodo)
         } else {
+            let today = Date()
             let emptyTodo = Todo(
                 id: 0,
                 title: "",
                 description: "",
-                dateOfCreation: customTodayDate(),
+                dateOfCreation: today,
                 isCompleted: false
             )
             self.todo = emptyTodo
@@ -48,11 +49,5 @@ final class TodoDetailPresenter: TodoDetailPresenterInput, TodoDetailInteractorO
             interactor?.saveTodo(todo: savedTodo)
         }
         router?.navigateBack()
-    }
-    
-    private func customTodayDate() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        return dateFormatter.string(from: Date())
     }
 }

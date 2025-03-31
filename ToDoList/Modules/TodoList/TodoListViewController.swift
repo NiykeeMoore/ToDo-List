@@ -108,16 +108,16 @@ final class TodoListViewController: UIViewController,
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier, for: indexPath) as? TodoListCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier, for: indexPath) as? TodoListCell,
+              let todo = presenter.getTodo(at: indexPath.row)
         else { return UITableViewCell() }
         
         cell.checkBox.delegate = self
         
-        let todo = presenter.getTodo(at: indexPath.row)
         cell.configureCell(
             title: todo.title,
             description: todo.description,
-            date: todo.dateOfCreation,
+            date: todo.dateOfCreation.formattedDisplayString,
             state: todo.isCompleted
         )
         

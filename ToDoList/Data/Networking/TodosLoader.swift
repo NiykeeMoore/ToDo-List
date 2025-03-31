@@ -35,9 +35,9 @@ struct TodosLoader: TodosLoading {
             case .success(let data):
                 do {
                     let decoded = try JSONDecoder().decode(TodosResponse.self, from: data)
-                    let todos = decoded.todos.map {
-                        $0.toDomain(
-                            description: getDescription(by: $0.id),
+                    let todos = decoded.todos.map { dto in
+                        dto.toDomain(
+                            description: getDescription(by: dto.id),
                             dateOfCreation: generateRandomDate()
                         )
                     }
@@ -90,21 +90,15 @@ struct TodosLoader: TodosLoading {
         return description
     }
     
-    private func generateRandomDate() -> String {
+    private func generateRandomDate() -> Date {
         let today = Date()
         guard let threeDaysAgo = Calendar.current.date(byAdding: .day, value: -5, to: today) else {
-            return customDateFormat(with: today)
+            return today
         }
         
         let interval = today.timeIntervalSince(threeDaysAgo)
         let randomInterval = TimeInterval(arc4random_uniform(UInt32(interval)))
         let date = threeDaysAgo.addingTimeInterval(randomInterval)
-        return customDateFormat(with: date)
-    }
-    
-    private func customDateFormat(with date: Date) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        return dateFormatter.string(from: date)
+        return date
     }
 }

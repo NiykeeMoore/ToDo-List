@@ -99,7 +99,7 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
         self.todo = todo
         titleTextField.text = todo?.title
         descriptionTextView.text = todo?.description
-        dateLabel.text = todo?.dateOfCreation
+        dateLabel.text = todo?.dateOfCreation.formattedDisplayString
     }
     
     @objc private func backButtonTapped() {

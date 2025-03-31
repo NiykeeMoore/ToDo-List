@@ -16,6 +16,7 @@ protocol TodoPresenterInput {
     func numberOfRows() -> Int
     func getTodo(at index: Int) -> Todo?
     func getIndex(for todoId: String) -> Int?
+    func searchTextChanged(to searchText: String)
 }
 
 final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
@@ -27,6 +28,8 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     
     // MARK: - Properties
     private var todos: [Todo] = []
+    private var filteredTodos: [Todo] = []
+    private var currentSearchText: String = ""
     
     // MARK: - Initialization
     init(interactor: TodoInteractorInput, coreDataManager: CoreDataManaging) {
@@ -36,11 +39,15 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     
     // MARK: - TodoInteractorInput
     func viewDidLoad() {
+        currentSearchText = ""
         interactor.fetchTodos()
     }
     
     func checkboxDidTapped(at index: Int) {
-        interactor.toggleTodoComplition(at: index)
+        let todoToToggle = isSearching() ? filteredTodos[index] : todos[index]
+        if let originalIndex = todos.firstIndex(where: { $0.id == todoToToggle.id }) {
+            interactor.toggleTodoComplition(at: originalIndex)
+        }
     }
     
     func didTappedCreateTodoButton() {
@@ -53,6 +60,8 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
             return
         }
         
+        let selectedTodo = isSearching() ? filteredTodos[index] : todos[index]
+        
         switch option {
         case .edit:
             router?.navigateToTodoDetail(with: todo, coreDataManager: coreDataManager)
@@ -61,30 +70,49 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
             viewController?.showShare(for: todo)
             
         case .delete:
-            interactor.deleteTodo(at: index)
+            if let originalIndex = todos.firstIndex(where: { $0.id == selectedTodo.id }) {
+                interactor.deleteTodo(at: originalIndex)
+            }
         }
     }
     
     func numberOfRows() -> Int {
-        return todos.count
+        return isSearching() ? filteredTodos.count : todos.count
     }
     
     func getTodo(at index: Int) -> Todo? {
-        guard todos.indices.contains(index) else {
-            assertionFailure("getTodo: bad index")
+        let array = isSearching() ? filteredTodos : todos
+        guard array.indices.contains(index) else {
+            print("getTodo: bad index")
             return nil
         }
-        return todos[index]
+        return array[index]
     }
     
     func getIndex(for todoId: String) -> Int? {
-         return todos.firstIndex(where: { $0.id == todoId })
-     }
+        let array = isSearching() ? filteredTodos : todos
+        return array.firstIndex(where: { $0.id == todoId })
+    }
+    
+    func searchTextChanged(to searchText: String) {
+        currentSearchText = searchText.lowercased()
+        
+        if currentSearchText.isEmpty {
+            filteredTodos = todos
+        } else {
+            filteredTodos = todos.filter { todo in
+                let titleMatch = todo.title.lowercased().contains(currentSearchText)
+                let descriptionMatch = todo.description.lowercased().contains(currentSearchText)
+                return titleMatch || descriptionMatch
+            }
+        }
+        viewController?.reloadData(todoCount: numberOfRows())
+    }
     
     // MARK: - TodoInteractorOutput
     func didFetchTodos(todos: [Todo]) {
         self.todos = todos
-        viewController?.reloadData(todoCount: todos.count)
+        searchTextChanged(to: currentSearchText)
     }
     
     func didFailToFetchTodos(error: Error) {
@@ -95,11 +123,44 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         guard todos.indices.contains(index) else { return }
         self.todos[index] = todo
         
-        viewController?.reloadRow(at: index, todoCount: self.todos.count)
+        if isSearching() {
+            if let filteredIndex = filteredTodos.firstIndex(where: { $0.id == todo.id }) {
+                if (todo.title.lowercased().contains(currentSearchText) || todo.description.lowercased().contains(currentSearchText)) {
+                    filteredTodos[filteredIndex] = todo
+                    viewController?.reloadRow(at: filteredIndex, todoCount: self.filteredTodos.count)
+                } else {
+                    filteredTodos.remove(at: filteredIndex)
+                    viewController?.reloadData(todoCount: self.filteredTodos.count)
+                }
+                
+            } else {
+                if (todo.title.lowercased().contains(currentSearchText) || todo.description.lowercased().contains(currentSearchText)) {
+                    searchTextChanged(to: currentSearchText)
+                }
+            }
+        } else {
+            viewController?.reloadRow(at: index, todoCount: self.todos.count)
+        }
     }
-
+    
     func didDeleteTodo(at index: Int) {
+        guard todos.indices.contains(index) else { return }
+        let deletedTodoId = todos[index].id
+        
         self.todos.remove(at: index)
-        viewController?.deleteRow(at: index, todoCount: self.todos.count)
+        
+        if isSearching() {
+            if let filteredIndex = filteredTodos.firstIndex(where: { $0.id == deletedTodoId }) {
+                filteredTodos.remove(at: filteredIndex)
+                viewController?.deleteRow(at: filteredIndex, todoCount: self.filteredTodos.count)
+            }
+        } else {
+            viewController?.deleteRow(at: index, todoCount: self.todos.count)
+        }
+    }
+    
+    // MARK: - Helpers
+    private func isSearching() -> Bool {
+        return !currentSearchText.isEmpty
     }
 }

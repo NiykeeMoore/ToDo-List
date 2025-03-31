@@ -19,7 +19,7 @@ enum TodoDetailModuleBuilder {
         viewController.presenter = presenter
         presenter.viewController = viewController
         presenter.router = router
-//        presenter.interactor = interactor
+        presenter.interactor = interactor
         interactor.presenter = presenter
         router.view = viewController
         

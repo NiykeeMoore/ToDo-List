@@ -198,7 +198,8 @@ final class TodoListViewController: UIViewController,
     
     // MARK: - UISearchController
     func updateSearchResults(for searchController: UISearchController) {
-        
+        let searchText = searchController.searchBar.text ?? ""
+        presenter.searchTextChanged(to: searchText)
     }
     
     // MARK: - TodoListViewInput
@@ -247,7 +248,7 @@ final class TodoListViewController: UIViewController,
             sourceRect: sourceViewForPopover?.bounds
         )
     }
-        
+    
     // MARK: - CustomTabBarDelegate
     func didTapCreateTodoButton() {
         presenter.didTappedCreateTodoButton()

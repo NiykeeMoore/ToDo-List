@@ -8,17 +8,15 @@
 import Foundation
 
 protocol TodoInteractorInput {
+    var presenter: TodoInteractorOutput? { get set }
     func fetchTodos()
     func toggleTodoComplition(at index: Int)
-    func shareTodo(todo: Todo)
     func deleteTodo(at index: Int)
 }
 
 protocol TodoInteractorOutput: AnyObject {
     func didFetchTodos(todos: [Todo])
     func didFailToFetchTodos(error: Error)
-    func prepareToShare(todo: Todo)
-    
     func didUpdateTodo(at index: Int, with todo: Todo)
     func didDeleteTodo(at index: Int)
 }
@@ -26,14 +24,14 @@ protocol TodoInteractorOutput: AnyObject {
 final class TodoListInteractor: TodoInteractorInput {
     // MARK: - Dependencies
     weak var presenter: TodoInteractorOutput?
-    private let todosLoader: TodosLoader
+    private let todosLoader: TodosLoading
     
     // MARK: - Properties
     private var todos: [Todo] = []
     private let dataQueue = DispatchQueue(label: "background.queue.for.data.update", qos: .userInitiated)
 
     // MARK: - Initialization
-    init(todosLoader: TodosLoader) {
+    init(todosLoader: TodosLoading) {
         self.todosLoader = todosLoader
     }
     
@@ -77,13 +75,6 @@ final class TodoListInteractor: TodoInteractorInput {
             }
         }
     }
-
-    func shareTodo(todo: Todo) {
-          DispatchQueue.main.async { [weak self] in
-              guard let self else { return }
-             self.presenter?.prepareToShare(todo: todo)
-         }
-     }
     
     func deleteTodo(at index: Int) {
         dataQueue.async { [weak self] in

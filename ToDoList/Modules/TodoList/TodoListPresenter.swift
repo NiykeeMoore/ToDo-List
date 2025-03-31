@@ -8,12 +8,14 @@
 import Foundation
 
 protocol TodoPresenterInput {
+    var router: TodoListRouter? { get }
     func viewDidLoad()
     func checkboxDidTapped(at index: Int)
     func didTappedCreateTodoButton()
     func didTappedEditMenuOption(option: ContextMenu, at index: Int)
     func numberOfRows() -> Int
     func getTodo(at index: Int) -> Todo?
+    func getIndex(for todoId: String) -> Int?
 }
 
 final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
@@ -54,7 +56,7 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
             router?.navigateToTodoDetail(with: todo)
             
         case .share:
-            interactor.shareTodo(todo: todo)
+            viewController?.showShare(for: todo)
             
         case .delete:
             interactor.deleteTodo(at: index)
@@ -73,6 +75,10 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         return todos[index]
     }
     
+    func getIndex(for todoId: String) -> Int? {
+         return todos.firstIndex(where: { $0.id == todoId })
+     }
+    
     // MARK: - TodoInteractorOutput
     func didFetchTodos(todos: [Todo]) {
         self.todos = todos
@@ -81,10 +87,6 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     
     func didFailToFetchTodos(error: Error) {
         viewController?.displayError(error: error)
-    }
-    
-    func prepareToShare(todo: Todo) {
-        router?.showShareScreen(with: todo.title)
     }
     
     func didUpdateTodo(at index: Int, with todo: Todo) {

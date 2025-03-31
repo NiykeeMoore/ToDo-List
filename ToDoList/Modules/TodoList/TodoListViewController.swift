@@ -10,9 +10,9 @@ import UIKit
 protocol TodoListViewInput: AnyObject {
     func reloadData(todoCount: Int)
     func displayError(error: Error)
-    
     func reloadRow(at index: Int, todoCount: Int)
     func deleteRow(at index: Int, todoCount: Int)
+    func showShare(for todo: Todo)
 }
 
 final class TodoListViewController: UIViewController,
@@ -229,6 +229,57 @@ final class TodoListViewController: UIViewController,
         })
     }
     
+    func showShare(for todo: Todo) {
+        var sourceViewForPopover: UIView? = nil
+        if let index = presenter.getIndex(for: todo.id) {
+            let indexPath = IndexPath(row: index, section: 0)
+            sourceViewForPopover = todoListTableView.cellForRow(at: indexPath)
+        }
+        
+        presenter.router?.showShareScreen(
+            with: todo.title,
+            sourceView: sourceViewForPopover,
+            sourceRect: sourceViewForPopover?.bounds
+        )
+        // Давай сделаем так: Presenter должен иметь метод для вызова share роутера.
+
+        // --- ПЕРЕДЕЛЫВАЕМ ЛОГИКУ SHARE ЕЩЕ РАЗ ---
+
+        // 1. Убираем showShare из ViewInput
+        // protocol TodoListViewInput: AnyObject {
+        //     ...
+        //     // func showShare(for todo: Todo) // УБИРАЕМ
+        // }
+        // final class TodoListViewController: /*...*/ {
+        //     // func showShare(for todo: Todo) { ... } // УБИРАЕМ
+        // }
+
+        // 2. Возвращаем вызов interactor.shareTodo/prepareToShare? Нет, это не даст нам sourceView.
+
+        // 3. Добавляем метод в Presenter Input, который принимает sourceView/Rect
+         // protocol TodoPresenterInput: AnyObject {
+         //    ...
+         //    func shareTodo(_ todo: Todo, sourceView: UIView?, sourceRect: CGRect?)
+         //    ...
+         // }
+
+        // 4. Presenter вызывает Router
+         // final class TodoListPresenter: TodoPresenterInput /*...*/ {
+         //    func shareTodo(_ todo: Todo, sourceView: UIView?, sourceRect: CGRect?) {
+         //        router?.showShareScreen(with: todo.title, sourceView: sourceView, sourceRect: sourceRect)
+         //    }
+         // }
+
+        // 5. View вызывает этот новый метод Presenter'а из context menu action
+         // В TodoListViewController, в обработчике shareAction контекстного меню:
+         // let shareAction = UIAction(...) { [weak self] _ in
+         //     guard let self, let todo = self.presenter.getTodo(at: indexPath.row) else { return }
+         //     // Находим sourceView/Rect для popover'а
+         //     let cell = self.todoListTableView.cellForRow(at: indexPath)
+         //     self.presenter.shareTodo(todo, sourceView: cell, sourceRect: cell?.bounds)
+         // }
+    }
+        
     // MARK: - CustomTabBarDelegate
     func didTapCreateTodoButton() {
         presenter.didTappedCreateTodoButton()

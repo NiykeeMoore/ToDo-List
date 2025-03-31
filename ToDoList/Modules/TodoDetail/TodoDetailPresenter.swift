@@ -8,6 +8,9 @@
 import Foundation
 
 protocol TodoDetailPresenterInput: AnyObject {
+    var viewController: TodoDetailViewInput? { get set }
+    var router: TodoDetailRouterInput? { get set }
+    var interactor: TodoDetailInteractorInput? { get set }
     func viewDidLoad()
     func buttonBackPressed(currentTitle: String?, currentDescription: String?)
 }

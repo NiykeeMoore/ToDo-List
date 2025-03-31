@@ -27,7 +27,8 @@ final class TodoListInteractor: TodoInteractorInput {
     
     // MARK: - Properties
     private var todos: [Todo] = []
-    
+    private let dataQueue = DispatchQueue(label: "background.queue.for.data.update", qos: .userInitiated)
+
     // MARK: - Initialization
     init(todosLoader: TodosLoader) {
         self.todosLoader = todosLoader
@@ -38,38 +39,59 @@ final class TodoListInteractor: TodoInteractorInput {
         todosLoader.load { [weak self] result in
             guard let self else { return }
             
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let fetchedTodos):
-                    self.todos = fetchedTodos
-                    self.presenter?.didFetchTodos(todos: self.todos)
-                case .failure(let error):
-                    self.presenter?.didFailToFetchTodos(error: error)
-                }
+            self.dataQueue.async {
+                  let processedResult: Result<[Todo], Error>
+                  switch result {
+                  case .success(let fetchedTodos):
+                      self.todos = fetchedTodos
+                      processedResult = .success(self.todos)
+                  case .failure(let error):
+                      processedResult = .failure(error)
+                  }
+
+                  DispatchQueue.main.async {
+                      switch processedResult {
+                      case .success(let todosToPresent):
+                          self.presenter?.didFetchTodos(todos: todosToPresent)
+                      case .failure(let error):
+                          self.presenter?.didFailToFetchTodos(error: error)
+                      }
+                  }
             }
         }
     }
     
     func toggleTodoComplition(at index: Int) {
-        let updatedTask = todos[index].withUpdatedComplition(isCompleted: !todos[index].isCompleted)
-        todos[index] = updatedTask
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            self.presenter?.didFetchTodos(todos: self.todos)
+        dataQueue.async { [weak self] in
+            guard let self,
+                  self.todos.indices.contains(index) else { return }
+
+            let updatedTask = self.todos[index].withUpdatedComplition(isCompleted: !self.todos[index].isCompleted)
+            self.todos[index] = updatedTask
+
+            DispatchQueue.main.async {
+                self.presenter?.didFetchTodos(todos: self.todos)
+            }
         }
     }
-    
+
     func shareTodo(todo: Todo) {
-        presenter?.prepareToShare(todo: todo)
-    }
+          DispatchQueue.main.async { [weak self] in
+              guard let self else { return }
+             self.presenter?.prepareToShare(todo: todo)
+         }
+     }
     
     func deleteTodo(at index: Int) {
-        todos.remove(at: index)
-        
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            self.presenter?.didFetchTodos(todos: self.todos)
+        dataQueue.async { [weak self] in
+            guard let self,
+                  self.todos.indices.contains(index) else { return }
+
+            self.todos.remove(at: index)
+
+            DispatchQueue.main.async {
+                self.presenter?.didFetchTodos(todos: self.todos)
+            }
         }
     }
 }

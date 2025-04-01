@@ -9,33 +9,19 @@
 import XCTest
 
 final class MockTodoListPresenter: TodoInteractorOutput {
-    var didFetchTodosCalledWithTodos: [Todo]?
     var didFailToFetchTodosCalledWithError: Error?
-    var didUpdateTodoCalledAtIndexAndTodo: (index: Int, todo: Todo)?
-    var didDeleteTodoCalledAtIndex: Int?
-
-    var didFetchExpectation: XCTestExpectation?
+    var frcFetchFailedCalledWithError: Error?
+    
     var didFailExpectation: XCTestExpectation?
-    var didUpdateExpectation: XCTestExpectation?
-    var didDeleteExpectation: XCTestExpectation?
-
-    func didFetchTodos(todos: [Todo]) {
-        didFetchTodosCalledWithTodos = todos
-        didFetchExpectation?.fulfill()
-    }
-
+    var frcFailExpectation: XCTestExpectation?
+    
     func didFailToFetchTodos(error: Error) {
         didFailToFetchTodosCalledWithError = error
         didFailExpectation?.fulfill()
     }
-
-    func didUpdateTodo(at index: Int, with todo: Todo) {
-        didUpdateTodoCalledAtIndexAndTodo = (index, todo)
-        didUpdateExpectation?.fulfill()
-    }
-
-    func didDeleteTodo(at index: Int) {
-        didDeleteTodoCalledAtIndex = index
-        didDeleteExpectation?.fulfill()
+    
+    func frcFetchFailed(error: Error) {
+        frcFetchFailedCalledWithError = error
+        frcFailExpectation?.fulfill()
     }
 }

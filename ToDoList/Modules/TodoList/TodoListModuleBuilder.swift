@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData // <-- Добавить
 
 enum TodoListModuleBuilder {
     static func createModule(coreDataManager: CoreDataManaging) -> UIViewController {
@@ -13,16 +14,35 @@ enum TodoListModuleBuilder {
         let todosLoader: TodosLoading = TodosLoader(networkClient: networkClient)
         let todoStore: TodoStoring = CoreDataStore(manager: coreDataManager)
         
-        var interactor: TodoInteractorInput = TodoListInteractor(todosLoader: todosLoader, todoStore: todoStore)
-        let presenter: TodoListPresenter & TodoInteractorOutput = TodoListPresenter(interactor: interactor, coreDataManager: coreDataManager)
-        let view = TodoListViewController(presenter: presenter)
+        // Создаем DataProvider
+        let dataProvider: TodoListDataProviderProtocol = FetchedResultsDataProvider(
+            context: coreDataManager.viewContext
+        )
+        
+        var interactor: TodoInteractorInput = TodoListInteractor(
+            todosLoader: todosLoader,
+            todoStore: todoStore,
+            coreDataManager: coreDataManager
+        )
+        
         let router: TodoListRouter = TodoListRouterImpl()
-
+        
+        let presenter: TodoListPresenter & TodoInteractorOutput = TodoListPresenter(
+            interactor: interactor,
+            router: router,
+            dataProvider: dataProvider,
+            coreDataManager: coreDataManager
+        )
+        
+        let view = TodoListViewController(
+            presenter: presenter,
+            dataProvider: dataProvider
+        )
+        
         presenter.viewController = view
-        presenter.router = router
         interactor.presenter = presenter
         router.viewController = view
-
+        
         return view
     }
 }

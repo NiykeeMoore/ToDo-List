@@ -58,7 +58,7 @@ final class TodosLoaderTests: XCTestCase {
         let validData = createValidTodosJSONData()
         mockNetworkClient.fetchHandlerResult = .success(validData)
         let expectation = XCTestExpectation(description: "Load completion handler called")
-        var capturedResult: Result<[Todo], Error>?
+        var capturedResult: Result<[TodoItemDTO], Error>?
         
         // When
         sut.load { result in
@@ -76,21 +76,18 @@ final class TodosLoaderTests: XCTestCase {
         }
         
         XCTAssertEqual(todos.count, 2, "Должно быть загружено 2 задачи")
-        XCTAssertEqual(todos[0].id, "1")
-        XCTAssertEqual(todos[0].title, "Do something nice for someone I care about")
-        XCTAssertEqual(todos[0].isCompleted, true)
+        XCTAssertEqual(todos[0].id, 1)
+        XCTAssertEqual(todos[0].todo, "Do something nice for someone I care about")
+        XCTAssertEqual(todos[0].completed, true)
         
-        XCTAssertFalse(todos[0].description.isEmpty)
-        XCTAssertFalse(todos[0].description.contains("Ошибка в определении описания"))
+        XCTAssertFalse(todos[0].todo.isEmpty)
+        XCTAssertFalse(todos[0].todo.contains("Ошибка в определении названия"))
         
-        XCTAssertEqual(todos[1].id, "2")
-        XCTAssertEqual(todos[1].title, "Memorize the fifty states and their capitals")
-        XCTAssertEqual(todos[1].isCompleted, false)
-        XCTAssertFalse(todos[1].description.isEmpty)
-        XCTAssertFalse(todos[1].description.contains("Ошибка в определении описания"))
-        
-        XCTAssertNotNil(todos[0].dateOfCreation)
-        XCTAssertNotNil(todos[1].dateOfCreation)
+        XCTAssertEqual(todos[1].id, 2)
+        XCTAssertEqual(todos[1].todo, "Memorize the fifty states and their capitals")
+        XCTAssertEqual(todos[1].completed, false)
+        XCTAssertFalse(todos[1].todo.isEmpty)
+        XCTAssertFalse(todos[1].todo.contains("Ошибка в определении названия"))
     }
     
     func test_load_whenNetworkSuccessButInvalidData_callsHandlerWithFailureDecodingError() {
@@ -98,7 +95,7 @@ final class TodosLoaderTests: XCTestCase {
         let invalidData = "{\"invalid\": \"json\"}".data(using: .utf8)! // Не соответствует TodosResponse
         mockNetworkClient.fetchHandlerResult = .success(invalidData)
         let expectation = XCTestExpectation(description: "Load completion handler called")
-        var capturedResult: Result<[Todo], Error>?
+        var capturedResult: Result<[TodoItemDTO], Error>?
         
         // When
         sut.load { result in
@@ -123,7 +120,7 @@ final class TodosLoaderTests: XCTestCase {
         let networkError = TestError.networkError
         mockNetworkClient.fetchHandlerResult = .failure(networkError)
         let expectation = XCTestExpectation(description: "Load completion handler called")
-        var capturedResult: Result<[Todo], Error>?
+        var capturedResult: Result<[TodoItemDTO], Error>?
         
         // When
         sut.load { result in

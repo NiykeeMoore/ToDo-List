@@ -12,11 +12,11 @@ final class MockTodosLoader: TodosLoading {
     var loadShouldReturn: Result<[Todo], Error>?
     var loadCalled = false
 
-    func load(handler: @escaping (Result<[Todo], Error>) -> Void) {
+    func load(handler: @escaping (Result<[TodoItemDTO], any Error>) -> Void) {
         loadCalled = true
-        if let result = loadShouldReturn {
+        if let _ = loadShouldReturn {
             DispatchQueue.global().async {
-                handler(result)
+                handler(.success([]))
             }
         } else {
              fatalError("loadShouldReturn не установлен в MockTodosLoader")

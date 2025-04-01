@@ -12,6 +12,7 @@ final class MockTodoStore: TodoStoring {
     var fetchShouldReturn: Result<[Todo], Error> = .success([])
     var saveShouldReturn: Result<Void, Error> = .success(())
     var deleteShouldReturn: Result<Void, Error> = .success(())
+    var batchInsertTodosCalledWithTodos: [Todo]?
     
     var fetchTodosCalled = false
     var saveTodoCalledWithTodo: Todo?
@@ -49,6 +50,15 @@ final class MockTodoStore: TodoStoring {
             self.deleteExpectation?.fulfill()
         }
     }
+    
+    func batchInsertTodos(from todos: [ToDoList.Todo], completion: @escaping (Result<Void, any Error>) -> Void) {
+        batchInsertTodosCalledWithTodos = todos
+        
+        DispatchQueue.main.async {
+            completion(.success((())))
+        }
+    }
+    
 }
 
 // MARK: - Test Error Enum

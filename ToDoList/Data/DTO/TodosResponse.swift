@@ -7,6 +7,6 @@
 
 import Foundation
 
-struct TodosResponse: Codable {
+struct TodosResponse: Decodable {
     let todos: [TodoItemDTO]
 }

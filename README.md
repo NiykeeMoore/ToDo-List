@@ -5,9 +5,9 @@
 * **Архитектура:** Модульная, основанная на принципах **VIPER** (View, Interactor, Presenter, Router) с небольшими адаптациями. Используется **Builder** для сборки модулей и внедрения зависимостей.
 * **Язык:** Swift
 * **UI:** UIKit (верстка кодом, без Storyboards/XIBs)
-* **Хранение данных:** Core Data
-* **Сеть:** URLSession (через обертку `NetworkClient`), Codable
-* **Тестирование:** Unit-тесты для Presenter'ов, Interactor'ов (частично), Loader, Store, Model, Утилит с использованием моков и in-memory store для Core Data).
+* **Хранение данных:** Core Data (FRC + NSBatchInsertRequest)
+* **Сеть:** URLSession (через обертку `NetworkClient`), Decodable
+* **Тестирование:** Unit-тесты для Presenter'ов, Interactor'ов, Loader, Store, Model, Утилит с использованием моков и in-memory store для Core Data).
 * **Зависимости:** Только стандартные фреймворки Apple.
 
 ---

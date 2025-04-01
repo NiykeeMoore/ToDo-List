@@ -85,6 +85,10 @@ final class FetchedResultsDataProvider: NSObject, TodoListDataProviderProtocol, 
         
         do {
             try performFetch()
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.delegate?.dataProviderDidChangeContent()
+            }
         } catch {
             print("DataProvider Ошибка загрузки предиката после фетча: \(error)")
         }

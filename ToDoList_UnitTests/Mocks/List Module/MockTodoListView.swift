@@ -8,35 +8,19 @@
 @testable import ToDoList
 
 final class MockTodoListView: TodoListViewInput {
-    var reloadDataCalled = false
-    var reloadDataTodoCount: Int?
     var displayErrorCalledWithError: Error?
-    var reloadRowCalledAtIndex: Int?
-    var reloadRowTodoCount: Int?
-    var deleteRowCalledAtIndex: Int?
-    var deleteRowTodoCount: Int?
     var showShareCalledWithTodo: Todo?
-
-    func reloadData(todoCount: Int) {
-        reloadDataCalled = true
-        reloadDataTodoCount = todoCount
-    }
-
+    var updateTodoCounterCalledWithCount: Int?
+    
     func displayError(error: Error) {
         displayErrorCalledWithError = error
     }
-
-    func reloadRow(at index: Int, todoCount: Int) {
-        reloadRowCalledAtIndex = index
-        reloadRowTodoCount = todoCount
-    }
-
-    func deleteRow(at index: Int, todoCount: Int) {
-        deleteRowCalledAtIndex = index
-        deleteRowTodoCount = todoCount
-    }
-
+    
     func showShare(for todo: Todo) {
         showShareCalledWithTodo = todo
+    }
+    
+    func updateTodoCounter(_ count: Int) {
+        updateTodoCounterCalledWithCount = count
     }
 }

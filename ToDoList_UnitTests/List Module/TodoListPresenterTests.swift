@@ -6,26 +6,33 @@
 //
 
 import XCTest
+import CoreData
 @testable import ToDoList
 
 final class TodoListPresenterTests: XCTestCase {
     
     var systemUnderTest: TodoListPresenter!
-    var mockInteractor: MockTodoInteractor!
+    var mockInteractor: MockTodoListInteractor!
     var mockView: MockTodoListView!
     var mockRouter: MockTodoListRouter!
+    var mockDataProvider: MockTodoListDataProvider!
     var mockCoreDataManager: MockCoreDataManager!
     
     override func setUpWithError() throws {
         try super.setUpWithError()
-        mockInteractor = MockTodoInteractor()
+        mockInteractor = MockTodoListInteractor()
         mockView = MockTodoListView()
         mockRouter = MockTodoListRouter()
+        mockDataProvider = MockTodoListDataProvider()
         mockCoreDataManager = MockCoreDataManager()
         
-        systemUnderTest = TodoListPresenter(interactor: mockInteractor, coreDataManager: mockCoreDataManager)
+        systemUnderTest = TodoListPresenter(
+            interactor: mockInteractor,
+            router: mockRouter,
+            dataProvider: mockDataProvider,
+            coreDataManager: mockCoreDataManager
+        )
         systemUnderTest.viewController = mockView
-        systemUnderTest.router = mockRouter
         mockInteractor.presenter = systemUnderTest
     }
     
@@ -34,36 +41,36 @@ final class TodoListPresenterTests: XCTestCase {
         mockInteractor = nil
         mockView = nil
         mockRouter = nil
+        mockDataProvider = nil
         mockCoreDataManager = nil
         try super.tearDownWithError()
     }
     
-    // MARK: - Тесты
+    // MARK: - Тесты viewDidLoad
     
-    func test_viewDidLoad_callsInteractorFetchTodos() {
+    func test_viewDidLoad_callsInteractorFetchTodosIfNeeded() {
         // When
         systemUnderTest.viewDidLoad()
         
         // Then
-        XCTAssertTrue(mockInteractor.fetchTodosCalled, "viewDidLoad() должен вызывать interactor.fetchTodos()")
+        XCTAssertTrue(mockInteractor.fetchTodosIfNeededCalled, "viewDidLoad() должен вызывать interactor.fetchTodosIfNeeded()")
     }
     
-    func test_didFetchTodos_updatesTodosAndReloadsView() {
+    // MARK: - Тесты InteractorOutput (только ошибки)
+    
+    func test_frcFetchFailed_callsViewDisplayError() {
         // Given
-        let todos = [createTestTodo(id: "1"), createTestTodo(id: "2")]
+        enum TestError: Error { case frcError }
+        let error = TestError.frcError
         
         // When
-        systemUnderTest.didFetchTodos(todos: todos)
+        systemUnderTest.frcFetchFailed(error: error)
         
         // Then
-        XCTAssertEqual(systemUnderTest.numberOfRows(), 2, "Количество строк должно обновиться")
-        XCTAssertTrue(mockView.reloadDataCalled, "View должен перезагрузить данные")
-        XCTAssertEqual(mockView.reloadDataTodoCount, 2, "Количество задач при перезагрузке должно быть 2")
-        
-        
-        XCTAssertEqual(systemUnderTest.getTodo(at: 0)?.id, "1")
-        XCTAssertEqual(systemUnderTest.getTodo(at: 1)?.id, "2")
+        XCTAssertNotNil(mockView.displayErrorCalledWithError, "View должен показать ошибку FRC")
+        XCTAssertTrue(mockView.displayErrorCalledWithError is TestError, "Тип ошибки должен совпадать")
     }
+    
     
     func test_didFailToFetchTodos_callsViewDisplayError() {
         // Given
@@ -78,33 +85,33 @@ final class TodoListPresenterTests: XCTestCase {
         XCTAssertTrue(mockView.displayErrorCalledWithError is TestError, "Тип ошибки должен совпадать")
     }
     
-    func test_checkboxDidTapped_callsInteractorToggleCompletion() {
+    // MARK: - Тесты действий пользователя
+    
+    func test_checkboxDidTapped_callsDataProviderObjectAt_callsInteractorToggleCompletion() {
         // Given
-        let todos = [createTestTodo(id: "1", title: "Task 1"), createTestTodo(id: "2", title: "Task 2")]
-        systemUnderTest.didFetchTodos(todos: todos)
+        let indexPath = IndexPath(row: 0, section: 0)
+        let entity = createTestTodoEntity(id: "toggle123", context: mockCoreDataManager.viewContext)
+        mockDataProvider.objectToReturn = entity
         
         // When
-        systemUnderTest.checkboxDidTapped(at: 1)
+        systemUnderTest.checkboxDidTapped(at: indexPath)
         
         // Then
-        XCTAssertEqual(mockInteractor.toggleTodoComplitionCalledWithIndex, 1, "Interactor должен получить правильный индекс для переключения")
+        XCTAssertEqual(mockDataProvider.objectAtIndexPathCalled, indexPath, "Должен быть запрошен объект у DataProvider по индексу")
+        XCTAssertEqual(mockInteractor.toggleTodoCompletionCalledWithId, "toggle123", "Interactor должен получить ID для переключения")
     }
     
-    func test_checkboxDidTapped_whenSearching_callsInteractorWithCorrectOriginalIndex() {
+    func test_checkboxDidTapped_whenDataProviderReturnsNil_doesNothing() {
         // Given
-        let todos = [
-            createTestTodo(id: "1", title: "Apple"),
-            createTestTodo(id: "2", title: "Banana"),
-            createTestTodo(id: "3", title: "Avocado")
-        ]
-        systemUnderTest.didFetchTodos(todos: todos)
-        systemUnderTest.searchTextChanged(to: "Avo")
+        let indexPath = IndexPath(row: 0, section: 0)
+        mockDataProvider.objectToReturn = nil
         
         // When
-        systemUnderTest.checkboxDidTapped(at: 0)
+        systemUnderTest.checkboxDidTapped(at: indexPath)
         
         // Then
-        XCTAssertEqual(mockInteractor.toggleTodoComplitionCalledWithIndex, 2, "Interactor должен получить оригинальный индекс (2) для 'Avocado'")
+        XCTAssertEqual(mockDataProvider.objectAtIndexPathCalled, indexPath)
+        XCTAssertNil(mockInteractor.toggleTodoCompletionCalledWithId, "Interactor.toggle не должен вызываться")
     }
     
     func test_didTappedCreateTodoButton_callsRouterNavigateToDetailWithNil() {
@@ -117,152 +124,75 @@ final class TodoListPresenterTests: XCTestCase {
         XCTAssertTrue(mockRouter.coreDataManagerPassed is MockCoreDataManager, "Должен быть передан CoreDataManager")
     }
     
-    func test_didTappedEditMenuOptionEdit_callsRouterNavigateToDetailWithTodo() {
+    func test_didTappedEditMenuOptionEdit_callsDataProviderObjectAt_callsRouterNavigateToDetailWithTodo() {
         // Given
-        let todo1 = createTestTodo(id: "1")
-        let todo2 = createTestTodo(id: "2")
-        systemUnderTest.didFetchTodos(todos: [todo1, todo2])
+        let indexPath = IndexPath(row: 1, section: 0)
+        let entity = createTestTodoEntity(id: "edit456", title: "Edit Me", context: mockCoreDataManager.viewContext)
+        mockDataProvider.objectToReturn = entity
         
         // When
-        systemUnderTest.didTappedEditMenuOption(option: .edit, at: 1)
+        systemUnderTest.didTappedEditMenuOption(option: .edit, at: indexPath)
         
         // Then
+        XCTAssertEqual(mockDataProvider.objectAtIndexPathCalled, indexPath)
         XCTAssertTrue(mockRouter.navigateToTodoDetailCalled, "Роутер должен быть вызван для навигации")
-        XCTAssertEqual(mockRouter.navigateToTodoDetailCalledWithTodo?.id, "2", "Роутер должен получить правильное todo для редактирования")
+        XCTAssertEqual(mockRouter.navigateToTodoDetailCalledWithTodo?.id, "edit456", "Роутер должен получить правильное todo для редактирования")
+        XCTAssertEqual(mockRouter.navigateToTodoDetailCalledWithTodo?.title, "Edit Me")
         XCTAssertTrue(mockRouter.coreDataManagerPassed is MockCoreDataManager, "Должен быть передан CoreDataManager")
     }
     
-    func test_didTappedEditMenuOptionShare_callsViewShowShare() {
+    func test_didTappedEditMenuOptionShare_callsDataProviderObjectAt_callsViewShowShare() {
         // Given
-        let todo1 = createTestTodo(id: "1")
-        let todo2 = createTestTodo(id: "2")
-        systemUnderTest.didFetchTodos(todos: [todo1, todo2])
+        let indexPath = IndexPath(row: 0, section: 0)
+        let entity = createTestTodoEntity(id: "share789", title: "Share This", context: mockCoreDataManager.viewContext)
+        mockDataProvider.objectToReturn = entity
         
         // When
-        systemUnderTest.didTappedEditMenuOption(option: .share, at: 0)
+        systemUnderTest.didTappedEditMenuOption(option: .share, at: indexPath)
         
         // Then
-        XCTAssertEqual(mockView.showShareCalledWithTodo?.id, "1", "View должен получить правильное todo для шаринга")
-        XCTAssertFalse(mockRouter.showShareScreenCalled, "Метод роутера showShareScreen не должен вызываться напрямую из этой опции презентера")
+        XCTAssertEqual(mockDataProvider.objectAtIndexPathCalled, indexPath)
+        XCTAssertEqual(mockView.showShareCalledWithTodo?.id, "share789", "View должен получить правильное todo для шаринга")
+        XCTAssertEqual(mockView.showShareCalledWithTodo?.title, "Share This")
     }
     
-    func test_didTappedEditMenuOptionDelete_callsInteractorDeleteTodo() {
+    func test_didTappedEditMenuOptionDelete_callsDataProviderObjectAt_callsInteractorDeleteTodo() {
         // Given
-        let todo1 = createTestTodo(id: "1")
-        let todo2 = createTestTodo(id: "2")
-        systemUnderTest.didFetchTodos(todos: [todo1, todo2])
+        let indexPath = IndexPath(row: 0, section: 0)
+        let entity = createTestTodoEntity(id: "delete101", context: mockCoreDataManager.viewContext)
+        mockDataProvider.objectToReturn = entity
         
         // When
-        systemUnderTest.didTappedEditMenuOption(option: .delete, at: 0)
+        systemUnderTest.didTappedEditMenuOption(option: .delete, at: indexPath)
         
         // Then
-        XCTAssertEqual(mockInteractor.deleteTodoCalledWithIndex, 0, "Interactor должен получить правильный индекс для удаления")
-    }
-    
-    func test_didTappedEditMenuOptionDelete_whenSearching_callsInteractorWithCorrectOriginalIndex() {
-        // Given
-        let todos = [
-            createTestTodo(id: "1", title: "Apple"),
-            createTestTodo(id: "2", title: "Banana"),
-            createTestTodo(id: "3", title: "Avocado")
-        ]
-        systemUnderTest.didFetchTodos(todos: todos)
-        systemUnderTest.searchTextChanged(to: "bana")
-        
-        // When
-        systemUnderTest.didTappedEditMenuOption(option: .delete, at: 0)
-        
-        // Then
-        XCTAssertEqual(mockInteractor.deleteTodoCalledWithIndex, 1, "Interactor должен получить оригинальный индекс (1) для 'Banana'")
-    }
-    
-    
-    // MARK: - Тесты на обновление/удаление
-    
-    func test_didUpdateTodo_updatesInternalStateAndReloadsRow() {
-        // Given
-        let initialTodos = [createTestTodo(id: "1", isCompleted: false), createTestTodo(id: "2")]
-        systemUnderTest.didFetchTodos(todos: initialTodos)
-        let updatedTodo = createTestTodo(id: "1", isCompleted: true)
-        
-        // When
-        systemUnderTest.didUpdateTodo(at: 0, with: updatedTodo)
-        
-        // Then
-        XCTAssertEqual(systemUnderTest.getTodo(at: 0)?.isCompleted, true, "Состояние todo должно обновиться")
-        XCTAssertEqual(mockView.reloadRowCalledAtIndex, 0, "View должен обновить строку по правильному индексу")
-        XCTAssertEqual(mockView.reloadRowTodoCount, 2, "Количество задач при обновлении строки должно быть 2")
-    }
-    
-    func test_didDeleteTodo_updatesInternalStateAndDeletesRow() {
-        // Given
-        let initialTodos = [createTestTodo(id: "1"), createTestTodo(id: "2")]
-        systemUnderTest.didFetchTodos(todos: initialTodos)
-        
-        // When
-        systemUnderTest.didDeleteTodo(at: 0)
-        
-        // Then
-        XCTAssertEqual(systemUnderTest.numberOfRows(), 1, "Количество todo должно уменьшиться")
-        XCTAssertEqual(systemUnderTest.getTodo(at: 0)?.id, "2", "Оставшийся todo должен быть правильным")
-        XCTAssertEqual(mockView.deleteRowCalledAtIndex, 0, "View должен удалить строку по правильному индексу")
-        XCTAssertEqual(mockView.deleteRowTodoCount, 1, "Количество задач при удалении строки должно быть 1")
+        XCTAssertEqual(mockDataProvider.objectAtIndexPathCalled, indexPath)
+        XCTAssertEqual(mockInteractor.deleteTodoCalledWithId, "delete101", "Interactor должен получить ID для удаления")
     }
     
     // MARK: - Тесты поиска
     
-    func test_searchTextChanged_toEmpty_showsAllTodos() {
+    func test_searchTextChanged_callsDataProviderUpdatePredicate() {
         // Given
-        let todos = [createTestTodo(id: "1"), createTestTodo(id: "2")]
-        systemUnderTest.didFetchTodos(todos: todos)
-        systemUnderTest.searchTextChanged(to: "some search")
+        let searchText = "find me"
         
         // When
-        systemUnderTest.searchTextChanged(to: "")
+        systemUnderTest.searchTextChanged(to: searchText)
         
         // Then
-        XCTAssertEqual(systemUnderTest.numberOfRows(), 2, "Должны отображаться все задачи")
-        XCTAssertEqual(mockView.reloadDataTodoCount, 2, "Количество задач при перезагрузке должно быть 2")
-        XCTAssertTrue(mockView.reloadDataCalled)
+        XCTAssertEqual(mockDataProvider.updatePredicateCalledWithText, searchText, "DataProvider должен обновить предикат с текстом поиска")
     }
     
-    func test_searchTextChanged_filtersByTitle() {
-        // Given
-        let todos = [createTestTodo(title: "Find Me"), createTestTodo(title: "Another")]
-        systemUnderTest.didFetchTodos(todos: todos)
-        
-        // When
-        systemUnderTest.searchTextChanged(to: "find")
-        
-        // Then
-        XCTAssertEqual(systemUnderTest.numberOfRows(), 1, "Должна остаться одна задача")
-        XCTAssertEqual(systemUnderTest.getTodo(at: 0)?.title, "Find Me", "Оставшаяся задача должна быть правильной")
-        XCTAssertEqual(mockView.reloadDataTodoCount, 1)
-        XCTAssertTrue(mockView.reloadDataCalled)
-    }
     
-    func test_searchTextChanged_noResults() {
-        // Given
-        let todos = [createTestTodo(title: "One"), createTestTodo(title: "Two")]
-        systemUnderTest.didFetchTodos(todos: todos)
-        
-        // When
-        systemUnderTest.searchTextChanged(to: "Three")
-        
-        // Then
-        XCTAssertEqual(systemUnderTest.numberOfRows(), 0, "Не должно быть найденных задач")
-        XCTAssertEqual(mockView.reloadDataTodoCount, 0)
-        XCTAssertTrue(mockView.reloadDataCalled)
-    }
-    
-    // MARK: - Helpers method
-    func createTestTodo(id: String = UUID().uuidString, title: String = "Test", description: String = "Desc", isCompleted: Bool = false) -> Todo {
-        return Todo(
-            id: id,
-            title: title,
-            description: description,
-            dateOfCreation: Date(),
-            isCompleted: isCompleted
-        )
+    // MARK: - Helpers
+    @discardableResult
+    func createTestTodoEntity(id: String = UUID().uuidString, title: String = "Test", description: String = "Desc", isCompleted: Bool = false, date: Date = Date(), context: NSManagedObjectContext) -> TodoEntity {
+        let entity = TodoEntity(context: context)
+        entity.id = id
+        entity.title = title
+        entity.todoDescription = description
+        entity.isCompleted = isCompleted
+        entity.dateOfCreation = date
+        return entity
     }
 }

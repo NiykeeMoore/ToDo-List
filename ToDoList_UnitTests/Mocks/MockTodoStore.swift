@@ -12,7 +12,10 @@ final class MockTodoStore: TodoStoring {
     var fetchShouldReturn: Result<[Todo], Error> = .success([])
     var saveShouldReturn: Result<Void, Error> = .success(())
     var deleteShouldReturn: Result<Void, Error> = .success(())
+    var batchInsertShouldReturn: Result<Void, Error> = .success(())
+    
     var batchInsertTodosCalledWithTodos: [Todo]?
+    var batchInsertCalled = false
     
     var fetchTodosCalled = false
     var saveTodoCalledWithTodo: Todo?
@@ -22,6 +25,7 @@ final class MockTodoStore: TodoStoring {
     var saveExpectation: XCTestExpectation?
     var deleteExpectation: XCTestExpectation?
     var fetchExpectation: XCTestExpectation?
+    var batchInsertExpectation: XCTestExpectation?
     
     func fetchTodos(completion: @escaping (Result<[Todo], Error>) -> Void) {
         fetchTodosCalled = true
@@ -35,7 +39,7 @@ final class MockTodoStore: TodoStoring {
     func saveTodo(_ todo: Todo, completion: @escaping (Result<Void, Error>) -> Void) {
         saveTodoCalledWithTodo = todo
         saveTodoCallCount += 1
-       
+        
         DispatchQueue.global().async {
             completion(self.saveShouldReturn)
             self.saveExpectation?.fulfill()
@@ -52,10 +56,12 @@ final class MockTodoStore: TodoStoring {
     }
     
     func batchInsertTodos(from todos: [ToDoList.Todo], completion: @escaping (Result<Void, any Error>) -> Void) {
+        batchInsertCalled = true
         batchInsertTodosCalledWithTodos = todos
         
-        DispatchQueue.main.async {
-            completion(.success((())))
+        DispatchQueue.global().async {
+            completion(self.batchInsertShouldReturn)
+            self.batchInsertExpectation?.fulfill()
         }
     }
     

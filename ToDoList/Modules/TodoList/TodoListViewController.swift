@@ -8,20 +8,20 @@
 import UIKit
 
 protocol TodoListViewInput: AnyObject {
-    func reloadData(todoCount: Int)
     func displayError(error: Error)
-    func reloadRow(at index: Int, todoCount: Int)
-    func deleteRow(at index: Int, todoCount: Int)
     func showShare(for todo: Todo)
+    func updateTodoCounter(_ count: Int)
 }
 
 final class TodoListViewController: UIViewController,
                                     UITableViewDelegate, UITableViewDataSource,
                                     UISearchResultsUpdating,
                                     TodoListViewInput,
-                                    CustomTabBarDelegate {
+                                    CustomTabBarDelegate,
+                                    DataProviderDelegate {
     // MARK: - Dependencies
     private let presenter: TodoPresenterInput
+    private let dataProvider: TodoListDataProviderProtocol
     
     // MARK: - UI Elements
     private lazy var todoListTableView: UITableView = {
@@ -48,9 +48,11 @@ final class TodoListViewController: UIViewController,
     }()
     
     //MARK: - Initialization
-    init(presenter: TodoPresenterInput) {
+    init(presenter: TodoPresenterInput, dataProvider: TodoListDataProviderProtocol) {
         self.presenter = presenter
+        self.dataProvider = dataProvider
         super.init(nibName: nil, bundle: nil)
+        self.dataProvider.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -62,17 +64,19 @@ final class TodoListViewController: UIViewController,
         super.viewDidLoad()
         view.backgroundColor = .appBlack
         
+        do {
+            try dataProvider.performFetch()
+        } catch {
+            presenter.frcFetchFailed(error: error)
+        }
+        
         presenter.viewDidLoad()
         
         configureUI()
         configureConstraints()
         
         customTabBar.delegate = self
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        presenter.viewDidLoad()
+        updateTodoCounterFromProvider()
     }
     
     // MARK: - UI Setup
@@ -108,24 +112,24 @@ final class TodoListViewController: UIViewController,
     
     // MARK: - UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return presenter.numberOfRows()
+        return dataProvider.numberOfRows(in: section)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier, for: indexPath) as? TodoListCell,
-              let todo = presenter.getTodo(at: indexPath.row)
-        else { return UITableViewCell() }
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TodoListCell.reuseIdentifier, for: indexPath) as? TodoListCell else { return UITableViewCell() }
         
-        cell.configureCell(
-            title: todo.title,
-            description: todo.description,
-            date: todo.dateOfCreation.formattedDisplayString,
-            state: todo.isCompleted
-        )
+        if let todoEntity = dataProvider.object(at: indexPath) {
+            cell.configureCell(
+                title: todoEntity.title ?? "",
+                description: todoEntity.todoDescription ?? "",
+                date: todoEntity.dateOfCreation?.formattedDisplayString ?? "",
+                state: todoEntity.isCompleted
+            )
+        }
         
         cell.checkBox.didCheckBoxTapped = { [weak self] in
             guard let self else { return }
-            self.presenter.checkboxDidTapped(at: indexPath.row)
+            self.presenter.checkboxDidTapped(at: indexPath)
         }
         
         return cell
@@ -141,31 +145,11 @@ final class TodoListViewController: UIViewController,
         contextMenuConfigurationForRowAt indexPath: IndexPath,
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
-        return UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) { _ in
-            let editAction = UIAction(
-                title: ContextMenu.edit.rawValue,
-                image: .iconContextMenuEdit) { [weak self] _ in
-                    guard let self else { return }
-                    self.presenter.didTappedEditMenuOption(option: .edit, at: indexPath.row)
-                }
-            
-            let shareAction = UIAction(
-                title: ContextMenu.share.rawValue,
-                image: .iconContextMenuShare) { [weak self] _ in
-                    guard let self else { return }
-                    self.presenter.didTappedEditMenuOption(option: .share, at: indexPath.row)
-                }
-            
-            let deleteAction = UIAction(
-                title: ContextMenu.delete.rawValue,
-                image: .iconContextMenuDelete,
-                attributes: .destructive) { [weak self] _ in
-                    guard let self else { return }
-                    self.presenter.didTappedEditMenuOption(option: .delete, at: indexPath.row)
-                }
-            
-            return UIMenu(title: "", children: [editAction, shareAction, deleteAction])
+        let config = UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+            return self.presenter.getContextMenu(for: indexPath)
         }
+        return config
     }
     
     func tableView(
@@ -198,16 +182,10 @@ final class TodoListViewController: UIViewController,
     
     // MARK: - UISearchController
     func updateSearchResults(for searchController: UISearchController) {
-        let searchText = searchController.searchBar.text ?? ""
-        presenter.searchTextChanged(to: searchText)
+        presenter.searchTextChanged(to: searchController.searchBar.text ?? "")
     }
     
     // MARK: - TodoListViewInput
-    func reloadData(todoCount: Int) {
-        todoListTableView.reloadData()
-        customTabBar.updateTodoCounterLabel(todoCount)
-    }
-    
     func displayError(error: any Error) {
         let alert = UIAlertController(title: "Ошибка",
                                       message: error.localizedDescription,
@@ -216,30 +194,16 @@ final class TodoListViewController: UIViewController,
         present(alert, animated: true)
     }
     
-    func reloadRow(at index: Int, todoCount: Int) {
-        let indexPath = IndexPath(row: index, section: 0)
-        if todoListTableView.indexPathsForVisibleRows?.contains(indexPath) ?? false {
-            todoListTableView.reloadRows(at: [indexPath], with: .automatic)
-        }
-        customTabBar.updateTodoCounterLabel(todoCount)
-    }
-    
-    func deleteRow(at index: Int, todoCount: Int) {
-        let indexPath = IndexPath(row: index, section: 0)
-        
-        todoListTableView.performBatchUpdates({
-            todoListTableView.deleteRows(at: [indexPath], with: .automatic)
-        }, completion: { [weak self] _ in
-            guard let self else { return }
-            self.customTabBar.updateTodoCounterLabel(todoCount)
-        })
-    }
-    
     func showShare(for todo: Todo) {
-        var sourceViewForPopover: UIView? = nil
-        if let index = presenter.getIndex(for: todo.id) {
-            let indexPath = IndexPath(row: index, section: 0)
-            sourceViewForPopover = todoListTableView.cellForRow(at: indexPath)
+        var sourceViewForPopover: UIView?
+        
+        if let visibleIndexPaths = todoListTableView.indexPathsForVisibleRows {
+            for indexPath in visibleIndexPaths {
+                if let entity = dataProvider.object(at: indexPath), entity.id == todo.id {
+                    sourceViewForPopover = todoListTableView.cellForRow(at: indexPath)
+                    break
+                }
+            }
         }
         
         presenter.router?.showShareScreen(
@@ -252,5 +216,42 @@ final class TodoListViewController: UIViewController,
     // MARK: - CustomTabBarDelegate
     func didTapCreateTodoButton() {
         presenter.didTappedCreateTodoButton()
+    }
+    
+    // MARK: - DataProviderDelegate
+    func dataProviderWillChangeContent() {
+        todoListTableView.beginUpdates()
+    }
+    
+    func dataProviderDidChangeContent() {
+        todoListTableView.endUpdates()
+        todoListTableView.reloadData()
+        updateTodoCounterFromProvider()
+    }
+    
+    func dataProviderDidInsertObject(at indexPath: IndexPath) {
+        todoListTableView.insertRows(at: [indexPath], with: .automatic)
+    }
+    
+    func dataProviderDidDeleteObject(at indexPath: IndexPath) {
+        todoListTableView.deleteRows(at: [indexPath], with: .automatic)
+    }
+    
+    func dataProviderDidUpdateObject(at indexPath: IndexPath) {
+        todoListTableView.reloadRows(at: [indexPath], with: .none)
+    }
+    
+    func dataProviderDidMoveObject(from oldIndexPath: IndexPath, to newIndexPath: IndexPath) {
+        todoListTableView.deleteRows(at: [oldIndexPath], with: .automatic)
+        todoListTableView.insertRows(at: [newIndexPath], with: .automatic)
+    }
+    
+    func updateTodoCounter(_ count: Int) {
+        customTabBar.updateTodoCounterLabel(count)
+    }
+    
+    private func updateTodoCounterFromProvider() {
+        let count = dataProvider.numberOfRows(in: 0)
+        updateTodoCounter(count)
     }
 }

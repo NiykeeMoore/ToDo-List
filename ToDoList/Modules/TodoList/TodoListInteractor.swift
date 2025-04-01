@@ -6,19 +6,18 @@
 //
 
 import Foundation
+import CoreData
 
 protocol TodoInteractorInput {
     var presenter: TodoInteractorOutput? { get set }
-    func fetchTodos()
-    func toggleTodoComplition(at index: Int)
-    func deleteTodo(at index: Int)
+    func fetchTodosIfNeeded()
+    func toggleTodoCompletion(for todoID: String)
+    func deleteTodo(with todoID: String)
 }
 
 protocol TodoInteractorOutput: AnyObject {
-    func didFetchTodos(todos: [Todo])
     func didFailToFetchTodos(error: Error)
-    func didUpdateTodo(at index: Int, with todo: Todo)
-    func didDeleteTodo(at index: Int)
+    func frcFetchFailed(error: Error)
 }
 
 final class TodoListInteractor: TodoInteractorInput {
@@ -26,105 +25,84 @@ final class TodoListInteractor: TodoInteractorInput {
     weak var presenter: TodoInteractorOutput?
     private let todosLoader: TodosLoading
     private let todoStore: TodoStoring
+    private let coreDataManager: CoreDataManaging
     
     // MARK: - Properties
-    private var todos: [Todo] = []
     private let dataQueue = DispatchQueue(label: "background.queue.for.data.update", qos: .userInitiated)
     private let didLoadInitialDataKey = "didLoadInitialDataKey"
     
     // MARK: - Initialization
-    init(todosLoader: TodosLoading, todoStore: TodoStoring) {
+    init(todosLoader: TodosLoading, todoStore: TodoStoring, coreDataManager: CoreDataManaging) {
         self.todosLoader = todosLoader
         self.todoStore = todoStore
+        self.coreDataManager = coreDataManager
     }
     
     //MARK: - TodoInteractorInput
-    func fetchTodos() {
-        dataQueue.async { [weak self] in
-            guard let self else { return }
-            
-            self.todoStore.fetchTodos { result in
-                switch result {
-                case .success(let storedTodos):
-                    print("Interactor: Загружено \(storedTodos.count) todos из core data.")
-                    let didLoadInitial = UserDefaults.standard.bool(forKey: self.didLoadInitialDataKey)
-                    
-                    if storedTodos.isEmpty && !didLoadInitial {
+    func fetchTodosIfNeeded() {
+        let didLoadInitial = UserDefaults.standard.bool(forKey: self.didLoadInitialDataKey)
+        
+        if !didLoadInitial {
+            todoStore.fetchTodos { [weak self] result in
+                guard let self else { return }
+                
+                self.dataQueue.async {
+                    if case .success(let storedTodos) = result, storedTodos.isEmpty {
                         print("Interactor: Массив пустой и первая загрузка. Берем todos из api...")
                         self.loadFromNetworkAndSave()
+                    } else if case .failure(let error) = result {
+                        print("Interactor: Ошибка проверки перед загрузкой ошИБКА: \(error)")
+                        DispatchQueue.main.async {
+                            self.presenter?.didFailToFetchTodos(error: error)
+                        }
                     } else {
-                        print("Interactor: Берем todos из coredata")
-                        self.updateLocalTodos(with: storedTodos)
-                        self.presenter?.didFetchTodos(todos: storedTodos)
+                        if !didLoadInitial {
+                            UserDefaults.standard.set(true, forKey: self.didLoadInitialDataKey)
+                        }
                     }
-                    
-                case .failure(let error):
-                    print("Interactor: Ошибка загрузки из coredata. Ошибка: \(error)")
+                }
+            }
+        } else {
+            print("Interactor: Данные уже загружены - скипаем загрузку")
+        }
+    }
+    
+    func toggleTodoCompletion(for todoID: String) {
+        let backgroundContext = coreDataManager.newBackgroundContext()
+        
+        backgroundContext.perform { [weak self] in
+            guard let self else { return }
+            
+            let fetchRequest: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id == %@", todoID)
+            fetchRequest.fetchLimit = 1
+            
+            do {
+                if let entityToUpdate = try backgroundContext.fetch(fetchRequest).first {
+                    entityToUpdate.isCompleted.toggle()
+                    try backgroundContext.save()
+                    print("Interactor: Тогл комплишн у todo \(todoID)")
+                } else {
+                    print("Interactor: TodoEntity с id \(todoID) не найдено для тогл комплишена.")
+                }
+            } catch {
+                print("Interactor: Ошибка сохранения или получения. ID: \(todoID). Error: \(error)")
+                DispatchQueue.main.async {
                     self.presenter?.didFailToFetchTodos(error: error)
                 }
             }
         }
     }
     
-    func toggleTodoComplition(at index: Int) {
-        dataQueue.async { [weak self] in
-            guard
-                let self,
-                self.todos.indices.contains(index) else { return }
-            
-            let originalTodo = self.todos[index]
-            let updatedTodo = originalTodo.withUpdatedComplition(isCompleted: !originalTodo.isCompleted)
-            print("Interactor: Устанавлиавем тогл комплишен todo id \(updatedTodo.id) на=\(updatedTodo.isCompleted)")
-            
-            self.todoStore.saveTodo(updatedTodo) { result in
-                switch result {
-                case .success:
-                    print("Interactor: Тогл комплишен установлен todo id \(updatedTodo.id)")
-                    self.dataQueue.async {
-                        if self.todos.indices.contains(index) {
-                            self.todos[index] = updatedTodo
-                        }
-                        DispatchQueue.main.async {
-                            self.presenter?.didUpdateTodo(at: index, with: updatedTodo)
-                        }
-                    }
-                    
-                case .failure(let error):
-                    print("Interactor: Ошибка тогл комплишена todo id \(updatedTodo.id). Ошибка: \(error)")
-                    
-                    self.presenter?.didFailToFetchTodos(error: error)
-                }
-            }
-        }
-    }
-    
-    func deleteTodo(at index: Int) {
-        dataQueue.async { [weak self] in
-            guard
-                let self,
-                self.todos.indices.contains(index) else { return }
-            
-            let todoIdToDelete = self.todos[index].id
-            print("Interactor: Удаление todo id \(todoIdToDelete)")
-            
-            self.todoStore.deleteTodo(id: todoIdToDelete) { result in
-                
-                switch result {
-                case .success:
-                    print("Interactor: Удалили id \(todoIdToDelete)")
-                    self.dataQueue.async {
-                        if self.todos.indices.contains(index) && self.todos[index].id == todoIdToDelete {
-                            self.todos.remove(at: index)
-                        }
-                        DispatchQueue.main.async {
-                            self.presenter?.didDeleteTodo(at: index)
-                        }
-                    }
-                    
-                case .failure(let error):
-                    print("Interactor: Не удалили todo id \(todoIdToDelete). Ошибка: \(error)")
-                    self.presenter?.didFailToFetchTodos(error: error)
-                }
+    func deleteTodo(with todoID: String) {
+        todoStore.deleteTodo(id: todoID) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                print("Interactor: удален todo id \(todoID).")
+            case .failure(let error):
+                print("Interactor: ошибка удаления todo id \(todoID). Error: \(error)")
+                self.presenter?.didFailToFetchTodos(error: error)
             }
         }
     }
@@ -148,29 +126,40 @@ final class TodoListInteractor: TodoInteractorInput {
                         )
                     }
                     
-                    self.todoStore.batchInsertTodos(from: todosToSave) { batchResult in
-                        switch batchResult {
-                        case .success:
-                            UserDefaults.standard.set(true, forKey: self.didLoadInitialDataKey)
-                            print("Interactor: сохранен todo + didLoadInitialDataKey = true")
+                    let backgroundContext = self.coreDataManager.newBackgroundContext()
+                    
+                    backgroundContext.perform {
+                        for todo in todosToSave {
+                            let entity = TodoEntity(context: backgroundContext)
                             
-                        case .failure(let error):
-                            print("Interactor: сохранение todo. Ошибка: \(error)")
-                            self.presenter?.didFailToFetchTodos(error: error)
+                            entity.id = todo.id
+                            entity.title = todo.title
+                            entity.todoDescription = todo.description
+                            entity.dateOfCreation = todo.dateOfCreation
+                            entity.isCompleted = todo.isCompleted
+                        }
+                        
+                        do {
+                            try backgroundContext.save()
+                            DispatchQueue.main.async { [weak self] in
+                                guard let self else { return }
+                                UserDefaults.standard.set(true, forKey: self.didLoadInitialDataKey)
+                                print("Interactor: сохранены \(todosToSave.count) todos по одному + didLoadInitialDataKey = true")
+                            }
+                        } catch {
+                            print("Interactor: ошибка сохранения todos по одному. Ошибка: \(error)")
+                            DispatchQueue.main.async { [weak self] in
+                                self?.presenter?.didFailToFetchTodos(error: error)
+                            }
                         }
                     }
-                    
                 case .failure(let error):
                     print("Interactor: Не получилось получить DTOs по API. Ошибка: \(error)")
-                    self.presenter?.didFailToFetchTodos(error: error)
+                    DispatchQueue.main.async {
+                        self.presenter?.didFailToFetchTodos(error: error)
+                    }
                 }
             }
-        }
-    }
-    
-    private func updateLocalTodos(with newTodos: [Todo]) {
-        dataQueue.async {
-            self.todos = newTodos
         }
     }
     

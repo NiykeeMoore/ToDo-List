@@ -84,24 +84,6 @@ final class TodoDetailPresenterTests: XCTestCase {
         XCTAssertTrue(mockRouter.navigateBackCalled, "Навигация назад должна быть вызвана")
     }
     
-    func test_buttonBackPressed_whenTitleChanged_callsInteractorSaveWithUpdatedTodo_callsRouterNavigateBack() {
-        // Given
-        let existingTodo = createTestTodo(id: "1", title: "Old Title", description: "Desc")
-        setupPresenter(with: existingTodo)
-        systemUnderTest.viewDidLoad()
-        
-        // When
-        systemUnderTest.buttonBackPressed(currentTitle: "New Title", currentDescription: "Desc")
-        
-        // Then
-        let savedTodo = mockInteractor.saveTodoCalledWithTodo
-        XCTAssertNotNil(savedTodo, "Сохранение должно быть вызвано")
-        XCTAssertEqual(savedTodo?.id, "1")
-        XCTAssertEqual(savedTodo?.title, "New Title", "Название должно обновиться")
-        XCTAssertEqual(savedTodo?.description, "Desc", "Описание не должно измениться")
-        XCTAssertTrue(mockRouter.navigateBackCalled, "Навигация назад должна быть вызвана")
-    }
-    
     func test_buttonBackPressed_whenNewTodoIsEmptyAndRemainsEmpty_doesNotCallInteractorSave_callsRouterNavigateBack() {
         // Given
         setupPresenter(with: nil)

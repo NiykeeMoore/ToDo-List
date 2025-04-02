@@ -111,12 +111,6 @@ final class TodoDetailViewController: UIViewController, TodoDetailViewInput {
     }
     
     @objc private func backButtonTapped() {
-        guard
-            let newTitle = titleTextField.text, !newTitle.isEmpty,
-            let newDescription = descriptionTextView.text else {
-            presenter?.buttonBackPressed(currentTitle: nil, currentDescription: nil)
-            return
-        }
-        presenter?.buttonBackPressed(currentTitle: newTitle, currentDescription: newDescription)
+        presenter?.buttonBackPressed(currentTitle: titleTextField.text, currentDescription: descriptionTextView.text)
     }
 }

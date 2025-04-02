@@ -123,7 +123,7 @@ final class TodoListViewController: UIViewController,
                 title: todoEntity.title ?? "",
                 description: todoEntity.todoDescription ?? "",
                 date: todoEntity.dateOfCreation?.formattedDisplayString ?? "",
-                state: todoEntity.isCompleted
+                isCompleted: todoEntity.isCompleted
             )
         }
         

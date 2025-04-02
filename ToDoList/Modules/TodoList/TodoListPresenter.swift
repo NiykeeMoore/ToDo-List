@@ -26,11 +26,6 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
     private let dataProvider: TodoListDataProviderProtocol
     private let coreDataManager: CoreDataManaging
     
-    // MARK: - Properties
-    private var todos: [Todo] = []
-    private var filteredTodos: [Todo] = []
-    private var currentSearchText: String = ""
-    
     // MARK: - Initialization
     init(
         interactor: TodoInteractorInput,
@@ -100,7 +95,8 @@ final class TodoListPresenter: TodoPresenterInput, TodoInteractorOutput {
         
         let deleteAction = UIAction(
             title: ContextMenu.delete.rawValue,
-            image: .iconContextMenuDelete) { [weak self] _ in
+            image: .iconContextMenuDelete,
+            attributes: .destructive) { [weak self] _ in
                 guard let self else { return }
                 self.didTappedEditMenuOption(option: .delete, at: indexPath)
             }

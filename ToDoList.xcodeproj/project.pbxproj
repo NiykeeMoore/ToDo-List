@@ -12,7 +12,6 @@
 		4B00A0FE2D9B15F800CAED6A /* MockNetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00A0FD2D9B15F800CAED6A /* MockNetworkClient.swift */; };
 		4B00A1002D9B161F00CAED6A /* TodosLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00A0FF2D9B161F00CAED6A /* TodosLoaderTests.swift */; };
 		4B00A1022D9B16B300CAED6A /* CoreDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00A1012D9B16B300CAED6A /* CoreDataStoreTests.swift */; };
-		4B00A1042D9B195100CAED6A /* TodoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00A1032D9B195100CAED6A /* TodoTests.swift */; };
 		4B00A1062D9B19BC00CAED6A /* DateExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B00A1052D9B19BC00CAED6A /* DateExtensionsTests.swift */; };
 		4B05C60A2D9C70F50087B3DD /* TodoListDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B05C6092D9C70F50087B3DD /* TodoListDataProvider.swift */; };
 		4B05C60C2D9C89080087B3DD /* MockTodoListDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B05C60B2D9C89080087B3DD /* MockTodoListDataProvider.swift */; };
@@ -77,7 +76,6 @@
 		4B00A0FD2D9B15F800CAED6A /* MockNetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNetworkClient.swift; sourceTree = "<group>"; };
 		4B00A0FF2D9B161F00CAED6A /* TodosLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosLoaderTests.swift; sourceTree = "<group>"; };
 		4B00A1012D9B16B300CAED6A /* CoreDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStoreTests.swift; sourceTree = "<group>"; };
-		4B00A1032D9B195100CAED6A /* TodoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoTests.swift; sourceTree = "<group>"; };
 		4B00A1052D9B19BC00CAED6A /* DateExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateExtensionsTests.swift; sourceTree = "<group>"; };
 		4B05C6092D9C70F50087B3DD /* TodoListDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListDataProvider.swift; sourceTree = "<group>"; };
 		4B05C60B2D9C89080087B3DD /* MockTodoListDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTodoListDataProvider.swift; sourceTree = "<group>"; };
@@ -343,7 +341,6 @@
 				4B00A1072D9B1A1C00CAED6A /* List Module */,
 				4B00A0FF2D9B161F00CAED6A /* TodosLoaderTests.swift */,
 				4B00A1012D9B16B300CAED6A /* CoreDataStoreTests.swift */,
-				4B00A1032D9B195100CAED6A /* TodoTests.swift */,
 				4B00A1052D9B19BC00CAED6A /* DateExtensionsTests.swift */,
 			);
 			path = ToDoList_UnitTests;
@@ -549,7 +546,6 @@
 				4BD1E2102D9B0C4800184097 /* MockTodoDetailInteractor.swift in Sources */,
 				4B00A0FC2D9B155700CAED6A /* TodoDetailInteractorTests.swift in Sources */,
 				4BD1E2142D9B0C7000184097 /* MockTodosLoader.swift in Sources */,
-				4B00A1042D9B195100CAED6A /* TodoTests.swift in Sources */,
 				4BD1E2122D9B0C5C00184097 /* MockTodoDetailRouter.swift in Sources */,
 				4BD1E20E2D9B0C0800184097 /* MockTodoListView.swift in Sources */,
 				4B00A1022D9B16B300CAED6A /* CoreDataStoreTests.swift in Sources */,

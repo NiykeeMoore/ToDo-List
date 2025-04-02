@@ -10,7 +10,7 @@ import UIKit
 final class TodoListCell: UITableViewCell {
     // MARK: - Properties
     static let reuseIdentifier = String(describing: TodoListCell.self)
-
+    
     // MARK: - UI Elements
     lazy var checkBox = CheckBox()
     
@@ -67,7 +67,14 @@ final class TodoListCell: UITableViewCell {
     // MARK: - prepareForReuse
     override func prepareForReuse() {
         super.prepareForReuse()
+        let defaultAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.appWhite,
+            .strikethroughStyle: NSNumber(value: 0)
+        ]
+        titleLabel.attributedText = NSAttributedString(string: "", attributes: defaultAttributes)
+        
         titleLabel.text = nil
+        titleLabel.attributedText = nil
         descriptionLabel.text = nil
         dateOfCreationLabel.text = nil
         checkBox.setState(false)
@@ -75,7 +82,7 @@ final class TodoListCell: UITableViewCell {
     
     // MARK: - UI Setup
     private func setupUI() {
-
+        
         [checkBox, textDataStackView].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
@@ -102,11 +109,26 @@ final class TodoListCell: UITableViewCell {
         title: String,
         description: String,
         date: String,
-        state: Bool
+        isCompleted: Bool
     ) {
-        titleLabel.text = title
         descriptionLabel.text = description
         dateOfCreationLabel.text = date
-        checkBox.setState(state)
+        checkBox.setState(isCompleted)
+        
+        if isCompleted {
+            titleLabel.textColor = .appWhiteHalfOpacity
+            descriptionLabel.textColor = .appWhiteHalfOpacity
+            
+            let attributedTitle = NSAttributedString(
+                string: title,
+                attributes: [.strikethroughStyle: NSUnderlineStyle.single.rawValue]
+            )
+            titleLabel.attributedText = attributedTitle
+            
+        } else {
+            titleLabel.textColor = .appWhite
+            descriptionLabel.textColor = .appWhite
+            titleLabel.text = title
+        }
     }
 }

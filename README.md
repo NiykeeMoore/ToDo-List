@@ -1,5 +1,3 @@
-# ToDoList App (Тестовое задание Effective Mobile)
-
 ## Архитектура и Технологии
 
 * **Архитектура:** Модульная, основанная на принципах **VIPER** (View, Interactor, Presenter, Router) с небольшими адаптациями. Используется **Builder** для сборки модулей и внедрения зависимостей.
@@ -14,4 +12,4 @@
 
 ## Демонстрация работы
 
-![SimulatorScreenRecording-iPhone13mini-2025-03-31at22 01 12-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/95b6ea6b-d2c8-4016-ab52-c2f85ad8215f)
+![Uploading SimulatorScreenRecording-iPhone13mini-2025-04-02at13.22.53-ezgif.com-video-to-gif-converter.gif](https://github.com/user-attachments/assets/1cb433f2-8a6b-4986-bd4d-b36622c0b356)
